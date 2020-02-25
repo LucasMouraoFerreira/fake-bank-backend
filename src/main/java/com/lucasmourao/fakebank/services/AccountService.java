@@ -1,11 +1,12 @@
 package com.lucasmourao.fakebank.services;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.lucasmourao.fakebank.entities.Account;
@@ -19,8 +20,8 @@ public class AccountService {
 	@Autowired
 	private AccountRepository repository;
 
-	public List<Account> findAll() {
-		return repository.findAll();
+	public Page<Account> findAll(Pageable pageable) {
+		return repository.findAll(pageable);
 	}
 
 	public Account findById(long id) {
