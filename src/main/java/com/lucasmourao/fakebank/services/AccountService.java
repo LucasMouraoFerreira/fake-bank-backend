@@ -23,4 +23,8 @@ public class AccountService {
 		Optional<Account> acc = repository.findById(id);
 		return acc.get();
 	}
+	
+	public Account insertAccount(Account acc) {
+		return repository.save(acc);
+	}
 }
