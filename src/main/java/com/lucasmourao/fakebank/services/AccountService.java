@@ -4,10 +4,12 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 import com.lucasmourao.fakebank.entities.Account;
 import com.lucasmourao.fakebank.repositories.AccountRepository;
+import com.lucasmourao.fakebank.services.exceptions.ObjectNotFoundException;
 
 @Service
 public class AccountService {
@@ -21,7 +23,7 @@ public class AccountService {
 
 	public Account findById(long id) {
 		Optional<Account> acc = repository.findById(id);
-		return acc.get();
+		return acc.orElseThrow(()-> new ObjectNotFoundException(id));
 	}
 
 	public Account insertAccount(Account acc) {
@@ -29,12 +31,16 @@ public class AccountService {
 	}
 
 	public void deleteById(long id) {
+		try {
 		repository.deleteById(id);
+		}catch (EmptyResultDataAccessException e) {
+			throw new ObjectNotFoundException(id);
+		}
 	}
 
 	public Account updateAccount(long id, Account acc) {
 		Optional<Account> accAux = repository.findById(id);
-		return updateData(accAux.get(), acc);
+		return updateData(accAux.orElseThrow(()-> new ObjectNotFoundException(id)), acc);
 	}
 
 	private Account updateData(Account accAux, Account acc) {
