@@ -10,4 +10,9 @@ public interface AccountRepository extends JpaRepository<Account,Long>{
 
 	public Page<Account> findAll(Pageable pageable);
 	
+	public Page<Account> findByAgency(Integer agency,Pageable pageable);
+	
+	/*@Query("SELECT a FROM Account a where (a.ownerName = :ownerName)")
+	Page<Account> searchByRatingTextRegion(@Param("ownerName") String ownerName);*/
+	
 }

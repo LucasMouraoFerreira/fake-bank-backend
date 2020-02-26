@@ -28,6 +28,10 @@ public class AccountService {
 		Optional<Account> acc = repository.findById(id);
 		return acc.orElseThrow(()-> new ObjectNotFoundException(id));
 	}
+	
+	public Page<Account> findByAgency(Integer agency, Pageable pageable){
+		return repository.findByAgency(agency,pageable);
+	}
 
 	public Account insertAccount(Account acc) {
 		return repository.save(acc);
