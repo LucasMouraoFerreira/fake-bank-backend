@@ -8,15 +8,17 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.lucasmourao.fakebank.entities.enums.AccountType;
+
 @Entity
-@Table(name="tb_account")
-public class Account implements Serializable{
+@Table(name = "tb_account")
+public class Account implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	private Long id;	
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 	private Integer accountNumber;
 	private Integer agency;
 	private Integer password;
@@ -25,11 +27,13 @@ public class Account implements Serializable{
 	private String ownerAddress;
 	private Double balance;
 	private Boolean accountActive;
-	
-	public Account() {}
-	
+	private Integer accountType;
+
+	public Account() {
+	}
+
 	public Account(Long id, Integer accountNumber, Integer agency, Integer password, String ownerName, String ownerCpf,
-			String ownerAddress, Double balance, Boolean accountActive) {
+			String ownerAddress, Double balance, Boolean accountActive, AccountType accountType) {
 		this.id = id;
 		this.accountNumber = accountNumber;
 		this.agency = agency;
@@ -39,6 +43,7 @@ public class Account implements Serializable{
 		this.ownerAddress = ownerAddress;
 		this.balance = balance;
 		this.accountActive = accountActive;
+		this.setAccountType(accountType);
 	}
 
 	public Long getId() {
@@ -113,6 +118,19 @@ public class Account implements Serializable{
 		this.accountActive = accountActive;
 	}
 
+	public AccountType getAccountType() {
+		if (accountType != null) {
+			return AccountType.valueOf(accountType);
+		}
+		return null;
+	}
+
+	public void setAccountType(AccountType accountType) {
+		if (accountType != null) {
+			this.accountType = accountType.getCode();
+		}
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -137,6 +155,5 @@ public class Account implements Serializable{
 			return false;
 		return true;
 	}
-	
-	
+
 }

@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 import com.lucasmourao.fakebank.entities.Account;
+import com.lucasmourao.fakebank.entities.enums.AccountType;
 import com.lucasmourao.fakebank.repositories.AccountRepository;
 
 @Configuration
@@ -20,8 +21,8 @@ public class TestConfig implements CommandLineRunner{
 	@Override
 	public void run(String... agrs) throws Exception {
 		
-		Account acc1 = new Account(null,10125,1000,123456,"Lucas Ferreira","12590136489","Rua exemplo 54",0.0,true);
-		Account acc2 = new Account(null,10124,1000,654321,"Danilo Ferreira","12594536479","Rua exemplo 33",0.0,true);
+		Account acc1 = new Account(null,10125,1000,123456,"Lucas Ferreira","12590136489","Rua exemplo 54",0.0,true,AccountType.STANDARD);
+		Account acc2 = new Account(null,10124,1000,654321,"Danilo Ferreira","12594536479","Rua exemplo 33",0.0,true,AccountType.PREMIUM);
 		accountRepository.saveAll(Arrays.asList(acc1, acc2));
 		
 	}
