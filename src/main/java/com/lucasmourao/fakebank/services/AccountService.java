@@ -32,6 +32,16 @@ public class AccountService {
 	public Page<Account> findByAgency(Integer agency, Pageable pageable){
 		return repository.findByAgency(agency,pageable);
 	}
+	
+	public Page<Account> fullSearch(String ownerName,String ownerCpf,
+			Integer accountNumber, Pageable pageable){
+		return repository.fullSearch(ownerName, ownerCpf, accountNumber, pageable);
+	}
+	
+	public Page<Account> cpfAndAccountSearch(String ownerCpf,
+			Integer accountNumber, Pageable pageable){
+		return repository.cpfAndAccountSearch(ownerCpf, accountNumber, pageable);
+	}
 
 	public Account insertAccount(Account acc) {
 		return repository.save(acc);

@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.lucasmourao.fakebank.entities.Account;
-import com.lucasmourao.fakebank.resources.exceptions.ParamRequiredException;
 import com.lucasmourao.fakebank.services.AccountService;
 
 @RestController
@@ -42,18 +41,33 @@ public class AccountResource {
 		Account acc = service.findById(id);
 		return ResponseEntity.ok().body(acc);
 	}
-	
+
 	@GetMapping(value = "/agencysearch")
 	public ResponseEntity<Page<Account>> findbyAgency(@RequestParam(value = "page", defaultValue = "0") int page,
-			@RequestParam(value = "limit", defaultValue = "10") int limit, @RequestParam(value="agency", defaultValue ="0") int agency) {
-		if(agency != 0) {
-			Pageable pageable = PageRequest.of(page, limit);
-			Page<Account> list = service.findByAgency(agency,pageable);
-			return ResponseEntity.ok().body(list);
-		}
-		throw new ParamRequiredException("Agency param is required");
+			@RequestParam(value = "limit", defaultValue = "10") int limit, @RequestParam(value = "agency") int agency) {
+		Pageable pageable = PageRequest.of(page, limit);
+		Page<Account> list = service.findByAgency(agency, pageable);
+		return ResponseEntity.ok().body(list);
 	}
-	
+
+	@GetMapping(value = "/fullsearch")
+	public ResponseEntity<Page<Account>> fullSearch(@RequestParam(value = "page", defaultValue = "0") int page,
+			@RequestParam(value = "limit", defaultValue = "10") int limit,
+			@RequestParam(value = "accountNumber", defaultValue = "0") int accountNumber,
+			@RequestParam(value = "ownerName", defaultValue = "") String ownerName,
+			@RequestParam(value = "ownerCpf", defaultValue = "") String ownerCpf) {
+
+		Pageable pageable = PageRequest.of(page, limit);
+		Page<Account> list;
+		if (!ownerName.isEmpty()) {
+			list = service.fullSearch(ownerName, ownerCpf, accountNumber, pageable);
+		} else {
+			list = service.cpfAndAccountSearch(ownerCpf, accountNumber, pageable);
+		}
+
+		return ResponseEntity.ok().body(list);
+	}
+
 	@PostMapping
 	public ResponseEntity<Account> insertAccount(@RequestBody Account acc) {
 		acc = service.insertAccount(acc);
