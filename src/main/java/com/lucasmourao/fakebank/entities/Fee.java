@@ -18,21 +18,22 @@ public class Fee {
 	private String description;
 	private Double percentage;
 	private Double totalValue;
+	
 	private Integer accountType;
 	private Integer orderType;
 
 	public Fee() {
 	}
 
-	public Fee(Long id, String name, String description, Double percentage, Double totalValue, Integer accountType,
-			Integer orderType) {
+	public Fee(Long id, String name, String description, Double percentage, Double totalValue, AccountType accountType,
+			OrderType orderType) {
 		this.id = id;
 		this.name = name;
 		this.description = description;
 		this.percentage = percentage;
 		this.totalValue = totalValue;
-		this.accountType = accountType;
-		this.orderType = orderType;
+		setAccountType(accountType);
+		setOrderType(orderType);
 	}
 
 	public Long getId() {
