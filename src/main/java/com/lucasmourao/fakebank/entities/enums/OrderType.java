@@ -5,8 +5,10 @@ public enum OrderType {
 	DEPOSIT(0),
 	WITHDRAW(1),
 	TRANSFER(2),
-	LOAN(3);
-	
+	LOAN(3),
+	CARD_ANNUITY(4),
+	MONTHLY_FEE(5);
+
 	private int code;
 	
 	private OrderType(int code) {

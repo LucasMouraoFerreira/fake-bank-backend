@@ -1,13 +1,17 @@
 package com.lucasmourao.fakebank.entities;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.lucasmourao.fakebank.entities.enums.AccountType;
 
 @Entity
@@ -28,6 +32,10 @@ public class Account implements Serializable {
 	private Double balance;
 	private Boolean accountActive;
 	private Integer accountType;
+	
+	@JsonIgnore
+	@OneToMany(mappedBy="account")
+	private List<Order> orders = new ArrayList<>();
 
 	public Account() {
 	}
@@ -125,6 +133,10 @@ public class Account implements Serializable {
 		if (accountType != null) {
 			this.accountType = accountType.getCode();
 		}
+	}
+
+	public List<Order> getOrders() {
+		return orders;
 	}
 
 	@Override

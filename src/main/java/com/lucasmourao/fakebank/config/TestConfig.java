@@ -1,5 +1,6 @@
 package com.lucasmourao.fakebank.config;
 
+import java.time.Instant;
 import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,10 +10,12 @@ import org.springframework.context.annotation.Profile;
 
 import com.lucasmourao.fakebank.entities.Account;
 import com.lucasmourao.fakebank.entities.Fee;
+import com.lucasmourao.fakebank.entities.Order;
 import com.lucasmourao.fakebank.entities.enums.AccountType;
 import com.lucasmourao.fakebank.entities.enums.OrderType;
 import com.lucasmourao.fakebank.repositories.AccountRepository;
 import com.lucasmourao.fakebank.repositories.FeeRepository;
+import com.lucasmourao.fakebank.repositories.OrderRepository;
 
 @Configuration
 @Profile("test")
@@ -24,6 +27,9 @@ public class TestConfig implements CommandLineRunner{
 	@Autowired
 	private FeeRepository feeRepository;
 
+	@Autowired
+	private OrderRepository orderRepository;
+	
 	@Override
 	public void run(String... agrs) throws Exception {
 		
@@ -35,5 +41,8 @@ public class TestConfig implements CommandLineRunner{
 		Fee f2 = new Fee(null, "Transfer Fee - Premium", "Transfer fee for a Premium account",0.0,8.0,AccountType.PREMIUM,OrderType.TRANSFER);
 		feeRepository.saveAll(Arrays.asList(f1,f2));
 		
+		Order od1 = new Order(null, Instant.now(), OrderType.DEPOSIT, 500.00, 0.0, acc1);
+		Order od2 = new Order(null, Instant.now(), OrderType.WITHDRAW, 300.00, 5.0, acc2);
+		orderRepository.saveAll(Arrays.asList(od1,od2));
 	}
 }
