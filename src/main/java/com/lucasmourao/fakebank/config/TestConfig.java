@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Profile;
 import com.lucasmourao.fakebank.entities.Account;
 import com.lucasmourao.fakebank.entities.Fee;
 import com.lucasmourao.fakebank.entities.Order;
+import com.lucasmourao.fakebank.entities.TrasferOrder;
 import com.lucasmourao.fakebank.entities.enums.AccountType;
 import com.lucasmourao.fakebank.entities.enums.OrderType;
 import com.lucasmourao.fakebank.repositories.AccountRepository;
@@ -43,6 +44,7 @@ public class TestConfig implements CommandLineRunner{
 		
 		Order od1 = new Order(null, Instant.now(), OrderType.DEPOSIT, 500.00, 0.0, acc1);
 		Order od2 = new Order(null, Instant.now(), OrderType.WITHDRAW, 300.00, 5.0, acc2);
-		orderRepository.saveAll(Arrays.asList(od1,od2));
+		Order od3 = new TrasferOrder(null, Instant.now(),OrderType.TRANSFER,500.00,7.00,acc1,acc2.getId());
+		orderRepository.saveAll(Arrays.asList(od1,od2,od3));
 	}
 }

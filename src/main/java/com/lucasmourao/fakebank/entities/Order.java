@@ -7,6 +7,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -14,13 +16,14 @@ import javax.persistence.Table;
 import com.lucasmourao.fakebank.entities.enums.OrderType;
 
 @Entity
+@Inheritance(strategy = InheritanceType.JOINED)
 @Table(name="tb_order")
 public class Order implements Serializable{
 
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	@GeneratedValue(strategy=GenerationType.AUTO)
 	private Long id;
 	private Instant moment;
 	private Integer orderType;
