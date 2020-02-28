@@ -13,11 +13,13 @@ public class TrasferOrder extends Order {
 
 	private Long receivingAccountId;
 	
-	public TrasferOrder() {}
+	public TrasferOrder() {
+		super();
+	}
 
-	public TrasferOrder(Long id, Instant moment, OrderType orderType, Double baseValue, Double fee, Account account,
+	public TrasferOrder(Long id, Instant moment, Double baseValue, Double fee, Account account,
 			Long receivingAccountId) {
-		super(id, moment, orderType, baseValue, fee, account);
+		super(id, moment, OrderType.TRANSFER, baseValue, fee, account);
 		this.receivingAccountId = receivingAccountId;
 	}
 

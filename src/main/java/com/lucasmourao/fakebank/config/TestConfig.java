@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Profile;
 
 import com.lucasmourao.fakebank.entities.Account;
 import com.lucasmourao.fakebank.entities.Fee;
+import com.lucasmourao.fakebank.entities.LoanOrder;
 import com.lucasmourao.fakebank.entities.Order;
 import com.lucasmourao.fakebank.entities.TrasferOrder;
 import com.lucasmourao.fakebank.entities.enums.AccountType;
@@ -44,7 +45,8 @@ public class TestConfig implements CommandLineRunner{
 		
 		Order od1 = new Order(null, Instant.now(), OrderType.DEPOSIT, 500.00, 0.0, acc1);
 		Order od2 = new Order(null, Instant.now(), OrderType.WITHDRAW, 300.00, 5.0, acc2);
-		Order od3 = new TrasferOrder(null, Instant.now(),OrderType.TRANSFER,500.00,7.00,acc1,acc2.getId());
-		orderRepository.saveAll(Arrays.asList(od1,od2,od3));
+		Order od3 = new TrasferOrder(null, Instant.now(),500.00,7.00,acc1,acc2.getId());
+		Order od4 = new LoanOrder(null,Instant.now(),600.00, 0.0, acc2, 0.5, 3);
+		orderRepository.saveAll(Arrays.asList(od1,od2,od3,od4));
 	}
 }
