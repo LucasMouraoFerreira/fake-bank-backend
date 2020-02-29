@@ -4,6 +4,8 @@ import java.time.Instant;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,7 @@ import com.lucasmourao.fakebank.entities.LoanOrder;
 import com.lucasmourao.fakebank.entities.Order;
 import com.lucasmourao.fakebank.entities.TransferOrder;
 import com.lucasmourao.fakebank.repositories.OrderRepository;
+import com.lucasmourao.fakebank.services.exceptions.DatabaseException;
 import com.lucasmourao.fakebank.services.exceptions.ObjectNotFoundException;
 
 @Service
@@ -52,5 +55,15 @@ public class OrderService {
 	
 	public TransferOrder insert(TransferOrder order) {
 		return orderRepository.save(order);
+	}
+	
+	public void delete(long id) {
+		try {		
+		orderRepository.deleteById(id);
+		}catch (EmptyResultDataAccessException e) {
+			throw new ObjectNotFoundException(id);
+		}catch (DataIntegrityViolationException e) {
+			throw new DatabaseException(e.getMessage());
+		}
 	}
 }
