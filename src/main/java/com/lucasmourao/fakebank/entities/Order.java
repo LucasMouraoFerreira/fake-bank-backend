@@ -12,6 +12,7 @@ import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
 import com.lucasmourao.fakebank.entities.enums.OrderType;
 
@@ -25,9 +26,13 @@ public class Order implements Serializable{
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private Long id;
+	@NotNull
 	private Instant moment;
+	@NotNull
 	private Integer orderType;
+	@NotNull
 	private Double baseValue;
+	@NotNull
 	private Double fee;
 
 	@ManyToOne
@@ -85,6 +90,14 @@ public class Order implements Serializable{
 
 	public void setFee(Double fee) {
 		this.fee = fee;
+	}
+
+	public Account getAccount() {
+		return account;
+	}
+
+	public void setAccount(Account account) {
+		this.account = account;
 	}
 
 	@Override

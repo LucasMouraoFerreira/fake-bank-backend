@@ -7,17 +7,17 @@ import javax.persistence.Entity;
 import com.lucasmourao.fakebank.entities.enums.OrderType;
 
 @Entity
-public class TrasferOrder extends Order {
+public class TransferOrder extends Order {
 
 	private static final long serialVersionUID = 1L;
 
 	private Long receivingAccountId;
 	
-	public TrasferOrder() {
+	public TransferOrder() {
 		super();
 	}
 
-	public TrasferOrder(Long id, Instant moment, Double baseValue, Double fee, Account account,
+	public TransferOrder(Long id, Instant moment, Double baseValue, Double fee, Account account,
 			Long receivingAccountId) {
 		super(id, moment, OrderType.TRANSFER, baseValue, fee, account);
 		this.receivingAccountId = receivingAccountId;

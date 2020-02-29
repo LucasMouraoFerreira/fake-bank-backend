@@ -3,6 +3,7 @@ package com.lucasmourao.fakebank.entities;
 import java.time.Instant;
 
 import javax.persistence.Entity;
+import javax.validation.constraints.NotNull;
 
 import com.lucasmourao.fakebank.entities.enums.OrderType;
 
@@ -11,8 +12,10 @@ public class LoanOrder extends Order{
 
 	private static final long serialVersionUID = 1L;
 	
+	@NotNull
 	private Double rate;
 	private Double debtTotalAmount;
+	@NotNull
 	private Integer numberOfInstallments;
 	private Integer paidInstallments;
 	private Double amountPerInstallment;

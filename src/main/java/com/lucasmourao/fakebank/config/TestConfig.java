@@ -12,7 +12,7 @@ import com.lucasmourao.fakebank.entities.Account;
 import com.lucasmourao.fakebank.entities.Fee;
 import com.lucasmourao.fakebank.entities.LoanOrder;
 import com.lucasmourao.fakebank.entities.Order;
-import com.lucasmourao.fakebank.entities.TrasferOrder;
+import com.lucasmourao.fakebank.entities.TransferOrder;
 import com.lucasmourao.fakebank.entities.enums.AccountType;
 import com.lucasmourao.fakebank.entities.enums.OrderType;
 import com.lucasmourao.fakebank.repositories.AccountRepository;
@@ -43,9 +43,9 @@ public class TestConfig implements CommandLineRunner{
 		Fee f2 = new Fee(null, "Transfer Fee - Premium", "Transfer fee for a Premium account",0.0,8.0,AccountType.PREMIUM,OrderType.TRANSFER);
 		feeRepository.saveAll(Arrays.asList(f1,f2));
 		
-		Order od1 = new Order(null, Instant.now(), OrderType.DEPOSIT, 500.00, 0.0, acc1);
+		Order od1 = new Order(null, Instant.parse("2020-02-02T00:00:00Z"), OrderType.DEPOSIT, 500.00, 0.0, acc1);
 		Order od2 = new Order(null, Instant.now(), OrderType.WITHDRAW, 300.00, 5.0, acc2);
-		Order od3 = new TrasferOrder(null, Instant.now(),500.00,7.00,acc1,acc2.getId());
+		Order od3 = new TransferOrder(null, Instant.now(),500.00,7.00,acc1,acc2.getId());
 		Order od4 = new LoanOrder(null,Instant.now(),600.00, 0.0, acc2, 0.5, 3);
 		orderRepository.saveAll(Arrays.asList(od1,od2,od3,od4));
 	}
