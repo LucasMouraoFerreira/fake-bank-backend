@@ -12,8 +12,8 @@ import com.lucasmourao.fakebank.entities.Limit;
 
 public interface LimitRepository extends JpaRepository<Limit, Long> {
 
-	//Page<Limit> findAll(Pageable pageable);
+	Page<Limit> findAll(Pageable pageable);
 	
-	//@Query("SELECT l FROM Limit l where l.accountType = :accountType and l.orderType = :orderType")
-	//List<Limit> findLimit(@Param("accountType") Integer accountType, @Param("orderType") Integer orderType);
+	@Query("SELECT l FROM Limit l where l.accountType = :accountType and l.orderType = :orderType")
+	List<Limit> findLimit(@Param("accountType") Integer accountType, @Param("orderType") Integer orderType);
 }

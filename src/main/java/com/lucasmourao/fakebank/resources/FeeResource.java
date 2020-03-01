@@ -32,7 +32,7 @@ public class FeeResource {
 
 	@GetMapping
 	public ResponseEntity<Page<Fee>> findAll(@RequestParam(value = "page", defaultValue = "0") int page,
-			@RequestParam(value = "limit", defaultValue = "5") int limit) {
+			@RequestParam(value = "limit", defaultValue = "10") int limit) {
 		Pageable pageable = PageRequest.of(page, limit);
 		Page<Fee> list = service.findAll(pageable);
 		return ResponseEntity.ok().body(list);
@@ -46,9 +46,9 @@ public class FeeResource {
 
 	@GetMapping(value = "/fullsearch")
 	public ResponseEntity<Page<Fee>> fullSearch(@RequestParam(value = "page", defaultValue = "0") int page,
-			@RequestParam(value = "limit", defaultValue = "5") int limit,
+			@RequestParam(value = "limit", defaultValue = "10") int limit,
 			@RequestParam(value = "name", defaultValue = "") String name,
-			@RequestParam(value = "feeountType", defaultValue = "") AccountType accountType,
+			@RequestParam(value = "accountType", defaultValue = "") AccountType accountType,
 			@RequestParam(value = "orderType", defaultValue = "") OrderType orderType) {
 
 		Page<Fee> list;
