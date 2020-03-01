@@ -7,6 +7,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
 import com.lucasmourao.fakebank.entities.enums.AccountType;
 import com.lucasmourao.fakebank.entities.enums.OrderType;
@@ -22,10 +23,13 @@ public class Fee implements Serializable{
 	private Long id;
 	private String name;
 	private String description;
+	@NotNull
 	private Double percentage;
+	@NotNull
 	private Double totalValue;
-	
+	@NotNull
 	private Integer accountType;
+	@NotNull
 	private Integer orderType;
 
 	public Fee() {

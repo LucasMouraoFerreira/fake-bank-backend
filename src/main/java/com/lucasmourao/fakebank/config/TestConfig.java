@@ -35,8 +35,8 @@ public class TestConfig implements CommandLineRunner{
 	@Override
 	public void run(String... agrs) throws Exception {
 		
-		Account acc1 = new Account(null,10125,1001,123456,"Lucas Ferreira","12590136489","Rua exemplo 54",0.0,true,AccountType.STANDARD);
-		Account acc2 = new Account(null,10124,1000,654321,"Danilo Ferreira","12594536479","Rua exemplo 33",0.0,true,AccountType.PREMIUM);
+		Account acc1 = new Account(null,10125,1001,123456,"Lucas Ferreira","12590136489","Rua exemplo 54",0.0,true,AccountType.STANDARD,3,2500.0,10000.0,1000.0);
+		Account acc2 = new Account(null,10124,1000,654321,"Danilo Ferreira","12594536479","Rua exemplo 33",0.0,true,AccountType.PREMIUM, 5,5000.0,50000.0,2500.0);
 		accountRepository.saveAll(Arrays.asList(acc1, acc2));
 		
 		Fee f1 = new Fee(null, "Transfer Fee - Standard", "Transfer fee for a standard account",0.0,7.0,AccountType.STANDARD,OrderType.TRANSFER);

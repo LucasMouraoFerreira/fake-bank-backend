@@ -14,10 +14,13 @@ public class LoanOrder extends Order{
 	
 	@NotNull
 	private Double rate;
+	@NotNull
 	private Double debtTotalAmount;
 	@NotNull
 	private Integer numberOfInstallments;
+	@NotNull
 	private Integer paidInstallments;
+	@NotNull
 	private Double amountPerInstallment;
 	
 	public LoanOrder() {

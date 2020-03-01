@@ -3,6 +3,7 @@ package com.lucasmourao.fakebank.entities;
 import java.time.Instant;
 
 import javax.persistence.Entity;
+import javax.validation.constraints.NotNull;
 
 import com.lucasmourao.fakebank.entities.enums.OrderType;
 
@@ -11,6 +12,7 @@ public class TransferOrder extends Order {
 
 	private static final long serialVersionUID = 1L;
 
+	@NotNull
 	private Long receivingAccountId;
 	
 	public TransferOrder() {

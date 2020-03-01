@@ -10,6 +10,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.lucasmourao.fakebank.entities.enums.AccountType;
@@ -23,25 +24,44 @@ public class Account implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+	@NotNull
 	private Integer accountNumber;
+	@NotNull
+	private Integer accountDigit;
+	@NotNull
 	private Integer agency;
+	@NotNull
 	private Integer password;
+	@NotNull
 	private String ownerName;
+	@NotNull
 	private String ownerCpf;
 	private String ownerAddress;
+	@NotNull
 	private Double balance;
+	@NotNull
 	private Boolean accountActive;
+	@NotNull
 	private Integer accountType;
-	
+	@NotNull
+	private Double transferLimit;
+	@NotNull
+	private Double loanLimitTotal;
+	@NotNull
+	private Double loanLimitCurrent;
+	@NotNull
+	private Double withdrawLimit;
+
 	@JsonIgnore
-	@OneToMany(mappedBy="account")
+	@OneToMany(mappedBy = "account")
 	private List<Order> orders = new ArrayList<>();
 
 	public Account() {
 	}
 
 	public Account(Long id, Integer accountNumber, Integer agency, Integer password, String ownerName, String ownerCpf,
-			String ownerAddress, Double balance, Boolean accountActive, AccountType accountType) {
+			String ownerAddress, Double balance, Boolean accountActive, AccountType accountType, Integer accountDigit,
+			Double transferLimit, Double loanLimitTotal, Double withdrawLimit) {
 		this.id = id;
 		this.accountNumber = accountNumber;
 		this.agency = agency;
@@ -52,6 +72,11 @@ public class Account implements Serializable {
 		this.balance = balance;
 		this.accountActive = accountActive;
 		this.setAccountType(accountType);
+		this.accountDigit = accountDigit;
+		this.transferLimit = transferLimit;
+		this.loanLimitCurrent = loanLimitTotal;
+		this.loanLimitTotal = loanLimitTotal;
+		this.withdrawLimit = withdrawLimit;
 	}
 
 	public Long getId() {
@@ -137,6 +162,46 @@ public class Account implements Serializable {
 
 	public List<Order> getOrders() {
 		return orders;
+	}
+
+	public Integer getAccountDigit() {
+		return accountDigit;
+	}
+
+	public void setAccountDigit(Integer accountDigit) {
+		this.accountDigit = accountDigit;
+	}
+
+	public Double getTransferLimit() {
+		return transferLimit;
+	}
+
+	public void setTransferLimit(Double transferLimit) {
+		this.transferLimit = transferLimit;
+	}
+
+	public Double getLoanLimitTotal() {
+		return loanLimitTotal;
+	}
+
+	public void setLoanLimitTotal(Double loanLimitTotal) {
+		this.loanLimitTotal = loanLimitTotal;
+	}
+
+	public Double getLoanLimitCurrent() {
+		return loanLimitCurrent;
+	}
+
+	public void setLoanLimitCurrent(Double loanLimitCurrent) {
+		this.loanLimitCurrent = loanLimitCurrent;
+	}
+
+	public Double getWithdrawLimit() {
+		return withdrawLimit;
+	}
+
+	public void setWithdrawLimit(Double withdrawLimit) {
+		this.withdrawLimit = withdrawLimit;
 	}
 
 	@Override
