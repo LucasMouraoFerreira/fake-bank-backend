@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.lucasmourao.fakebank.dto.AccountCreationDTO;
 import com.lucasmourao.fakebank.entities.Account;
 import com.lucasmourao.fakebank.services.AccountService;
 
@@ -53,27 +54,23 @@ public class AccountResource {
 	@GetMapping(value = "/fullsearch")
 	public ResponseEntity<Page<Account>> fullSearch(@RequestParam(value = "page", defaultValue = "0") int page,
 			@RequestParam(value = "limit", defaultValue = "10") int limit,
-			@RequestParam(value = "accountNumber", defaultValue = "0") int accountNumber,
+			@RequestParam(value = "accountNumber", defaultValue = "0") Integer accountNumber,
+			@RequestParam(value = "accountDigit", defaultValue = "0") Integer accountDigit,
+			@RequestParam(value = "agency", defaultValue = "1000") Integer agency,
 			@RequestParam(value = "ownerName", defaultValue = "") String ownerName,
 			@RequestParam(value = "ownerCpf", defaultValue = "") String ownerCpf) {
 
 		Pageable pageable = PageRequest.of(page, limit);
-		Page<Account> list;
-		if (!ownerName.isEmpty()) {
-			list = service.fullSearch(ownerName, ownerCpf, accountNumber, pageable);
-		} else {
-			list = service.cpfAndAccountSearch(ownerCpf, accountNumber, pageable);
-		}
-
+		Page<Account> list = service.fullSearch(ownerName, ownerCpf, accountNumber, accountDigit,agency, pageable);
 		return ResponseEntity.ok().body(list);
 	}
 
 	@PostMapping
-	public ResponseEntity<Account> insertAccount(@RequestBody Account acc) {
-		acc = service.insertAccount(acc);
-		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(acc.getId())
+	public ResponseEntity<Account> insertAccount(@RequestBody AccountCreationDTO acc) {
+		Account accAux = service.insertAccount(acc);
+		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(accAux.getId())
 				.toUri();
-		return ResponseEntity.created(location).body(acc);
+		return ResponseEntity.created(location).body(accAux);
 	}
 
 	@DeleteMapping(value = "/{id}")

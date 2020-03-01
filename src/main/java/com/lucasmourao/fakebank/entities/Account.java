@@ -31,11 +31,12 @@ public class Account implements Serializable {
 	@NotNull
 	private Integer agency;
 	@NotNull
-	private Integer password;
+	private String password;
 	@NotNull
 	private String ownerName;
 	@NotNull
 	private String ownerCpf;
+	@NotNull
 	private String ownerAddress;
 	@NotNull
 	private Double balance;
@@ -59,7 +60,7 @@ public class Account implements Serializable {
 	public Account() {
 	}
 
-	public Account(Long id, Integer accountNumber, Integer agency, Integer password, String ownerName, String ownerCpf,
+	public Account(Long id, Integer accountNumber, Integer agency, String password, String ownerName, String ownerCpf,
 			String ownerAddress, Double balance, Boolean accountActive, AccountType accountType, Integer accountDigit,
 			Double transferLimit, Double loanLimitTotal, Double withdrawLimit) {
 		this.id = id;
@@ -99,11 +100,11 @@ public class Account implements Serializable {
 		this.agency = agency;
 	}
 
-	public Integer getPassword() {
+	public String getPassword() {
 		return password;
 	}
 
-	public void setPassword(Integer password) {
+	public void setPassword(String password) {
 		this.password = password;
 	}
 

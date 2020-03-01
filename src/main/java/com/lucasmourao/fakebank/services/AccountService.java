@@ -1,6 +1,7 @@
 package com.lucasmourao.fakebank.services;
 
 import java.util.Optional;
+import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -9,9 +10,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.lucasmourao.fakebank.dto.AccountCreationDTO;
 import com.lucasmourao.fakebank.entities.Account;
+import com.lucasmourao.fakebank.entities.enums.AccountType;
+import com.lucasmourao.fakebank.entities.enums.OrderType;
 import com.lucasmourao.fakebank.repositories.AccountRepository;
 import com.lucasmourao.fakebank.services.exceptions.DatabaseException;
+import com.lucasmourao.fakebank.services.exceptions.FieldRequiredException;
+import com.lucasmourao.fakebank.services.exceptions.InvalidFormatException;
 import com.lucasmourao.fakebank.services.exceptions.ObjectNotFoundException;
 
 @Service
@@ -20,46 +26,56 @@ public class AccountService {
 	@Autowired
 	private AccountRepository repository;
 
+	@Autowired
+	private LimitService limitService;
+
 	public Page<Account> findAll(Pageable pageable) {
 		return repository.findAll(pageable);
 	}
 
 	public Account findById(long id) {
 		Optional<Account> acc = repository.findById(id);
-		return acc.orElseThrow(()-> new ObjectNotFoundException(id));
-	}
-	
-	public Page<Account> findByAgency(Integer agency, Pageable pageable){
-		return repository.findByAgency(agency,pageable);
-	}
-	
-	public Page<Account> fullSearch(String ownerName,String ownerCpf,
-			Integer accountNumber, Pageable pageable){
-		return repository.fullSearch(ownerName, ownerCpf, accountNumber, pageable);
-	}
-	
-	public Page<Account> cpfAndAccountSearch(String ownerCpf,
-			Integer accountNumber, Pageable pageable){
-		return repository.cpfAndAccountSearch(ownerCpf, accountNumber, pageable);
+		return acc.orElseThrow(() -> new ObjectNotFoundException(id));
 	}
 
-	public Account insertAccount(Account acc) {
-		return repository.save(acc);
+	public Page<Account> findByAgency(Integer agency, Pageable pageable) {
+		return repository.findByAgency(agency, pageable);
+	}
+
+	public Page<Account> fullSearch(String ownerName, String ownerCpf, Integer accountNumber, Integer accountDigit,
+			Integer agency, Pageable pageable) {
+		return repository.fullSearch(ownerName, ownerCpf, accountNumber, accountDigit, agency, pageable);
+	}
+
+	public Account insertAccount(AccountCreationDTO acc) {
+		
+		verifyAccountData(acc);
+		int[] accountData = generateAccount();
+		
+		Double transferLimit = limitService.findLimit(acc.getAccountType(), OrderType.TRANSFER.getCode()).getAmount();
+		Double loanLimitTotal = limitService.findLimit(acc.getAccountType(), OrderType.LOAN.getCode()).getAmount();
+		Double withdrawLimit = limitService.findLimit(acc.getAccountType(), OrderType.WITHDRAW.getCode()).getAmount();
+
+		Account accAux = new Account(null, accountData[0], 1000, acc.getPassword(), acc.getOwnerName(),
+				acc.getOwnerCpf(), acc.getOwnerAddress(), 0.0, true, AccountType.valueOf(acc.getAccountType()),
+				accountData[1], transferLimit, loanLimitTotal, withdrawLimit);
+		
+		return repository.save(accAux);
 	}
 
 	public void deleteById(long id) {
 		try {
-		repository.deleteById(id);
-		}catch (EmptyResultDataAccessException e) {
+			repository.deleteById(id);
+		} catch (EmptyResultDataAccessException e) {
 			throw new ObjectNotFoundException(id);
-		}catch (DataIntegrityViolationException e) {
+		} catch (DataIntegrityViolationException e) {
 			throw new DatabaseException(e.getMessage());
 		}
 	}
 
 	public Account updateAccount(long id, Account acc) {
 		Optional<Account> accAux = repository.findById(id);
-		return updateData(accAux.orElseThrow(()-> new ObjectNotFoundException(id)), acc);
+		return updateData(accAux.orElseThrow(() -> new ObjectNotFoundException(id)), acc);
 	}
 
 	private Account updateData(Account accAux, Account acc) {
@@ -81,5 +97,44 @@ public class AccountService {
 		}
 
 		return repository.save(accAux);
+	}
+
+	private int[] generateAccount() {
+		Random random = new Random();
+		int digit = 0;
+		int account = 0;
+		do {
+			digit = random.ints(0, 10).findFirst().getAsInt();
+			account = random.ints(0, 100000).findFirst().getAsInt();
+		} while (!repository.findAccount(account, digit, 1000).isEmpty());
+		int[] accountData = { account, digit };
+		return accountData;
+	}
+	
+	private void verifyAccountData(AccountCreationDTO acc) {
+		if (acc.getAccountType() == null) {
+			throw new FieldRequiredException("Account Type");
+		}
+		if (acc.getPassword() == null) {
+			throw new FieldRequiredException("Password");
+		}
+		if (acc.getOwnerName() == null) {
+			throw new FieldRequiredException("Name");
+		}
+		if (acc.getOwnerCpf() == null) {
+			throw new FieldRequiredException("CPF");
+		}
+		if (acc.getOwnerAddress() == null) {
+			throw new FieldRequiredException("Address");
+		}
+		if (!acc.getPassword().matches("[0-9]+") || acc.getPassword().length() != 6) {
+			throw new InvalidFormatException("Password must contain only 6 digits.");
+		}
+		if (!acc.getOwnerCpf().matches("[0-9]+") || acc.getOwnerCpf().length() != 11) {
+			throw new InvalidFormatException("CPF must contain only 11 digits.");
+		}
+		if (!acc.getOwnerName().matches("[a-zA-Z\\s]+")) {
+			throw new InvalidFormatException("Name must contain only letters.");
+		}
 	}
 }
