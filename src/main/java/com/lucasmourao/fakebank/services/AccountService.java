@@ -31,7 +31,7 @@ public class AccountService {
 	private LimitService limitService;
 
 	public Page<SimpleAccountDTO> findAll(Pageable pageable) {
-		return repository.findAll(pageable).map(x->new SimpleAccountDTO(x));
+		return repository.findAll(pageable).map(x -> new SimpleAccountDTO(x));
 	}
 
 	public Account findById(long id) {
@@ -39,20 +39,21 @@ public class AccountService {
 		return acc.orElseThrow(() -> new ObjectNotFoundException(id));
 	}
 
-	public Page<Account> findByAgency(Integer agency, Pageable pageable) {
-		return repository.findByAgency(agency, pageable);
+	public Page<SimpleAccountDTO> findByAgency(Integer agency, Pageable pageable) {
+		return repository.findByAgency(agency, pageable).map(x -> new SimpleAccountDTO(x));
 	}
 
-	public Page<Account> fullSearch(String ownerName, String ownerCpf, Integer accountNumber, Integer accountDigit,
-			Integer agency, Pageable pageable) {
-		return repository.fullSearch(ownerName, ownerCpf, accountNumber, accountDigit, agency, pageable);
+	public Page<SimpleAccountDTO> fullSearch(String ownerName, String ownerCpf, Integer accountNumber,
+			Integer accountDigit, Integer agency, Pageable pageable) {
+		return repository.fullSearch(ownerName, ownerCpf, accountNumber, accountDigit, agency, pageable)
+				.map(x -> new SimpleAccountDTO(x));
 	}
 
 	public Account insertAccount(AccountCreationDTO acc) {
-		
+
 		verifyAccountData(acc);
 		int[] accountData = generateAccount();
-		
+
 		Double transferLimit = limitService.findLimit(acc.getAccountType(), OrderType.TRANSFER.getCode()).getAmount();
 		Double loanLimitTotal = limitService.findLimit(acc.getAccountType(), OrderType.LOAN.getCode()).getAmount();
 		Double withdrawLimit = limitService.findLimit(acc.getAccountType(), OrderType.WITHDRAW.getCode()).getAmount();
@@ -60,7 +61,7 @@ public class AccountService {
 		Account accAux = new Account(null, accountData[0], 1000, acc.getPassword(), acc.getOwnerName(),
 				acc.getOwnerCpf(), acc.getOwnerAddress(), 0.0, true, AccountType.valueOf(acc.getAccountType()),
 				accountData[1], transferLimit, loanLimitTotal, withdrawLimit);
-		
+
 		return repository.save(accAux);
 	}
 
@@ -111,7 +112,7 @@ public class AccountService {
 		int[] accountData = { account, digit };
 		return accountData;
 	}
-	
+
 	private void verifyAccountData(AccountCreationDTO acc) {
 		if (acc.getAccountType() == null) {
 			throw new FieldRequiredException("Account Type");

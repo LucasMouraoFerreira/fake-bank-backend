@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.lucasmourao.fakebank.dto.AccountCreationDTO;
+import com.lucasmourao.fakebank.dto.CompleteAccountDTO;
 import com.lucasmourao.fakebank.dto.SimpleAccountDTO;
 import com.lucasmourao.fakebank.entities.Account;
 import com.lucasmourao.fakebank.services.AccountService;
@@ -39,21 +40,21 @@ public class AccountResource {
 	}
 
 	@GetMapping(value = "/{id}")
-	public ResponseEntity<Account> findById(@PathVariable long id) {
-		Account acc = service.findById(id);
+	public ResponseEntity<CompleteAccountDTO> findById(@PathVariable long id) {
+		CompleteAccountDTO acc = new CompleteAccountDTO(service.findById(id));
 		return ResponseEntity.ok().body(acc);
 	}
 
 	@GetMapping(value = "/agencysearch")
-	public ResponseEntity<Page<Account>> findbyAgency(@RequestParam(value = "page", defaultValue = "0") int page,
+	public ResponseEntity<Page<SimpleAccountDTO>> findbyAgency(@RequestParam(value = "page", defaultValue = "0") int page,
 			@RequestParam(value = "limit", defaultValue = "10") int limit, @RequestParam(value = "agency") int agency) {
 		Pageable pageable = PageRequest.of(page, limit);
-		Page<Account> list = service.findByAgency(agency, pageable);
+		Page<SimpleAccountDTO> list = service.findByAgency(agency, pageable);
 		return ResponseEntity.ok().body(list);
 	}
 
 	@GetMapping(value = "/fullsearch")
-	public ResponseEntity<Page<Account>> fullSearch(@RequestParam(value = "page", defaultValue = "0") int page,
+	public ResponseEntity<Page<SimpleAccountDTO>> fullSearch(@RequestParam(value = "page", defaultValue = "0") int page,
 			@RequestParam(value = "limit", defaultValue = "10") int limit,
 			@RequestParam(value = "accountNumber", defaultValue = "0") Integer accountNumber,
 			@RequestParam(value = "accountDigit", defaultValue = "0") Integer accountDigit,
@@ -62,13 +63,13 @@ public class AccountResource {
 			@RequestParam(value = "ownerCpf", defaultValue = "") String ownerCpf) {
 
 		Pageable pageable = PageRequest.of(page, limit);
-		Page<Account> list = service.fullSearch(ownerName, ownerCpf, accountNumber, accountDigit,agency, pageable);
+		Page<SimpleAccountDTO> list = service.fullSearch(ownerName, ownerCpf, accountNumber, accountDigit,agency, pageable);
 		return ResponseEntity.ok().body(list);
 	}
 
 	@PostMapping
-	public ResponseEntity<Account> insertAccount(@RequestBody AccountCreationDTO acc) {
-		Account accAux = service.insertAccount(acc);
+	public ResponseEntity<CompleteAccountDTO> insertAccount(@RequestBody AccountCreationDTO acc) {
+		CompleteAccountDTO accAux = new CompleteAccountDTO(service.insertAccount(acc));
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(accAux.getId())
 				.toUri();
 		return ResponseEntity.created(location).body(accAux);
