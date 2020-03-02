@@ -1,5 +1,6 @@
 package com.lucasmourao.fakebank.services;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,16 @@ public class FeeService {
 	
 	public Page<Fee> fullSearch(String name, Integer orderType ,Integer accountType, Pageable pageable){
 		return repository.fullSearch(name, orderType, accountType, pageable);
+	}
+	
+	public Fee findFee(Integer accountType, Integer orderType){
+		List<Fee> fee = repository.findFee(accountType,orderType);
+		if(fee.isEmpty()) {
+			throw new ObjectNotFoundException(-1L);
+		}
+		else {
+			return fee.get(0);
+		}
 	}
 	
 	public Fee insert(Fee fee) {

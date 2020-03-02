@@ -50,7 +50,9 @@ public class TestConfig implements CommandLineRunner {
 				AccountType.STANDARD, OrderType.TRANSFER);
 		Fee f2 = new Fee(null, "Transfer Fee - Premium", "Transfer fee for a Premium account", 0.0, 8.0,
 				AccountType.PREMIUM, OrderType.TRANSFER);
-		feeRepository.saveAll(Arrays.asList(f1, f2));
+		Fee f3 = new Fee(null, "Transfer Fee - Premium", "Withdraw fee for a Premium account", 0.0, 5.0,
+				AccountType.PREMIUM, OrderType.WITHDRAW);
+		feeRepository.saveAll(Arrays.asList(f1, f2, f3));
 
 		Order od1 = new Order(null, Instant.parse("2020-02-02T00:00:00Z"), OrderType.DEPOSIT, 500.00, 0.0, acc1);
 		Order od2 = new Order(null, Instant.now(), OrderType.WITHDRAW, 300.00, 5.0, acc2);

@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.lucasmourao.fakebank.services.exceptions.DatabaseException;
 import com.lucasmourao.fakebank.services.exceptions.FieldRequiredException;
+import com.lucasmourao.fakebank.services.exceptions.InsufficientBalanceException;
 import com.lucasmourao.fakebank.services.exceptions.InvalidFormatException;
+import com.lucasmourao.fakebank.services.exceptions.LimitExceededException;
 import com.lucasmourao.fakebank.services.exceptions.NegativeValueException;
 import com.lucasmourao.fakebank.services.exceptions.ObjectNotFoundException;
 
@@ -58,4 +60,19 @@ public class ResourceExceptionHandler {
 		return ResponseEntity.status(status).body(err);
 	}
 	
+	@ExceptionHandler(InsufficientBalanceException.class)
+	public ResponseEntity<StandardError> insufficientBalanceException(InsufficientBalanceException e, HttpServletRequest request){
+		String error = "Insufficient balance error";
+		HttpStatus status = HttpStatus.BAD_REQUEST;
+		StandardError err = new StandardError(Instant.now(),status.value(),error,e.getMessage(),request.getRequestURI());
+		return ResponseEntity.status(status).body(err);
+	}
+	
+	@ExceptionHandler(LimitExceededException.class)
+	public ResponseEntity<StandardError> limitExceededException(LimitExceededException e, HttpServletRequest request){
+		String error = "Limit exceeded error";
+		HttpStatus status = HttpStatus.BAD_REQUEST;
+		StandardError err = new StandardError(Instant.now(),status.value(),error,e.getMessage(),request.getRequestURI());
+		return ResponseEntity.status(status).body(err);
+	}
 }

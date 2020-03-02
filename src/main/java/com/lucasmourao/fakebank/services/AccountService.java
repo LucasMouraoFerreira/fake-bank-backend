@@ -13,16 +13,19 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.lucasmourao.fakebank.dto.AccountCreationDTO;
-import com.lucasmourao.fakebank.dto.DepositOrderDTO;
+import com.lucasmourao.fakebank.dto.OrderRequestDTO;
 import com.lucasmourao.fakebank.dto.SimpleAccountDTO;
 import com.lucasmourao.fakebank.entities.Account;
+import com.lucasmourao.fakebank.entities.Fee;
 import com.lucasmourao.fakebank.entities.Order;
 import com.lucasmourao.fakebank.entities.enums.AccountType;
 import com.lucasmourao.fakebank.entities.enums.OrderType;
 import com.lucasmourao.fakebank.repositories.AccountRepository;
 import com.lucasmourao.fakebank.services.exceptions.DatabaseException;
 import com.lucasmourao.fakebank.services.exceptions.FieldRequiredException;
+import com.lucasmourao.fakebank.services.exceptions.InsufficientBalanceException;
 import com.lucasmourao.fakebank.services.exceptions.InvalidFormatException;
+import com.lucasmourao.fakebank.services.exceptions.LimitExceededException;
 import com.lucasmourao.fakebank.services.exceptions.NegativeValueException;
 import com.lucasmourao.fakebank.services.exceptions.ObjectNotFoundException;
 
@@ -34,9 +37,12 @@ public class AccountService {
 
 	@Autowired
 	private LimitService limitService;
-	
-	@Autowired 
+
+	@Autowired
 	private OrderService orderService;
+
+	@Autowired
+	private FeeService feeService;
 
 	public Page<SimpleAccountDTO> findAll(Pageable pageable) {
 		return repository.findAll(pageable).map(x -> new SimpleAccountDTO(x));
@@ -57,6 +63,15 @@ public class AccountService {
 				.map(x -> new SimpleAccountDTO(x));
 	}
 
+	public Account findAccount(OrderRequestDTO orderRequest) {
+		List<Account> account = repository.findAccount(orderRequest.getAccountNumber(), orderRequest.getAccountDigit(),
+				orderRequest.getAgency(), orderRequest.getOwnerName(), orderRequest.getPassword());
+		if (account.isEmpty()) {
+			throw new ObjectNotFoundException(-1L);
+		}
+		return account.get(0);
+	}
+	
 	public Account insertAccount(AccountCreationDTO acc) {
 
 		verifyAccountData(acc);
@@ -73,16 +88,31 @@ public class AccountService {
 		return repository.save(accAux);
 	}
 
-	public Order deposit(DepositOrderDTO depositOrder) {
-		verifyDepositOrder(depositOrder);
-		List<Account> account = repository.findAccount(depositOrder.getAccountNumber(), depositOrder.getAccountDigit(),
-				depositOrder.getAgency(), depositOrder.getOwnerName(), depositOrder.getPassword());
-		if(account.isEmpty()) {
-			throw new ObjectNotFoundException(-1L);
-		}
-		Account acc = account.get(0);
+	public Order deposit(OrderRequestDTO depositOrder) {
+		verifyOrderRequest(depositOrder);
+		Account acc = findAccount(depositOrder);
 		acc.deposit(depositOrder.getAmount());
 		Order order = new Order(null, Instant.now(), OrderType.DEPOSIT, depositOrder.getAmount(), 0.0, acc);
+		repository.save(acc);
+		return orderService.insert(order);
+	}
+
+	public Order withdraw(OrderRequestDTO withdrawOrder) {
+		verifyOrderRequest(withdrawOrder);
+		Account acc = findAccount(withdrawOrder);
+		Fee fee = feeService.findFee(acc.getAccountType().getCode(), OrderType.WITHDRAW.getCode());
+		Double withdrawPercentageFee = fee.getPercentage();
+		Double withdrawTotalFee = fee.getTotalValue();
+		Double amount = (withdrawOrder.getAmount() * (1.0 + withdrawPercentageFee)) + withdrawTotalFee;
+		if (acc.getBalance() < amount) {
+			throw new InsufficientBalanceException();
+		}
+		if(acc.getWithdrawLimit() < withdrawOrder.getAmount()) {
+			throw new LimitExceededException(OrderType.WITHDRAW.toString());
+		}
+		acc.withdraw(amount);
+		Order order = new Order(null, Instant.now(), OrderType.WITHDRAW, withdrawOrder.getAmount(),
+				(withdrawOrder.getAmount() * withdrawPercentageFee) + withdrawTotalFee, acc);
 		repository.save(acc);
 		return orderService.insert(order);
 	}
@@ -135,7 +165,7 @@ public class AccountService {
 		return accountData;
 	}
 
-	private void verifyDepositOrder(DepositOrderDTO depositOrder) {
+	private void verifyOrderRequest(OrderRequestDTO depositOrder) {
 		if (depositOrder.getAccountDigit() == null) {
 			throw new FieldRequiredException("Account Digit");
 		}

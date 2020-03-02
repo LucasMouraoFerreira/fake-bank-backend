@@ -2,7 +2,7 @@ package com.lucasmourao.fakebank.dto;
 
 import java.io.Serializable;
 
-public class DepositOrderDTO implements Serializable{
+public class OrderRequestDTO implements Serializable{
 
 	private static final long serialVersionUID = 1L;
 
@@ -13,9 +13,9 @@ public class DepositOrderDTO implements Serializable{
 	private String ownerName;
 	private String password;
 	
-	public DepositOrderDTO() {}
+	public OrderRequestDTO() {}
 	
-	public DepositOrderDTO(Double amount, Integer accountNumber, Integer accountDigit, Integer agency, String ownerName,
+	public OrderRequestDTO(Double amount, Integer accountNumber, Integer accountDigit, Integer agency, String ownerName,
 			String password) {
 		this.amount = amount;
 		this.accountNumber = accountNumber;
