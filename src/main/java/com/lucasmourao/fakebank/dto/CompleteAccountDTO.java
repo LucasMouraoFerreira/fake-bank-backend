@@ -1,10 +1,14 @@
 package com.lucasmourao.fakebank.dto;
 
+import java.io.Serializable;
+
 import com.lucasmourao.fakebank.entities.Account;
 import com.lucasmourao.fakebank.entities.enums.AccountType;
 
-public class CompleteAccountDTO {
-
+public class CompleteAccountDTO implements Serializable{
+		
+	private static final long serialVersionUID = 1L;
+	
 	private Long id;
 	private Integer accountNumber;
 	private Integer accountDigit;

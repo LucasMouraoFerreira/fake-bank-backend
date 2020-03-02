@@ -230,4 +230,7 @@ public class Account implements Serializable {
 		return true;
 	}
 
+	public void deposit(double amount) {
+		balance += amount;
+	}
 }

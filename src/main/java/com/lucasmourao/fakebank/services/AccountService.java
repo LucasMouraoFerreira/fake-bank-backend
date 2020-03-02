@@ -1,5 +1,7 @@
 package com.lucasmourao.fakebank.services;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
@@ -11,14 +13,17 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.lucasmourao.fakebank.dto.AccountCreationDTO;
+import com.lucasmourao.fakebank.dto.DepositOrderDTO;
 import com.lucasmourao.fakebank.dto.SimpleAccountDTO;
 import com.lucasmourao.fakebank.entities.Account;
+import com.lucasmourao.fakebank.entities.Order;
 import com.lucasmourao.fakebank.entities.enums.AccountType;
 import com.lucasmourao.fakebank.entities.enums.OrderType;
 import com.lucasmourao.fakebank.repositories.AccountRepository;
 import com.lucasmourao.fakebank.services.exceptions.DatabaseException;
 import com.lucasmourao.fakebank.services.exceptions.FieldRequiredException;
 import com.lucasmourao.fakebank.services.exceptions.InvalidFormatException;
+import com.lucasmourao.fakebank.services.exceptions.NegativeValueException;
 import com.lucasmourao.fakebank.services.exceptions.ObjectNotFoundException;
 
 @Service
@@ -29,6 +34,9 @@ public class AccountService {
 
 	@Autowired
 	private LimitService limitService;
+	
+	@Autowired 
+	private OrderService orderService;
 
 	public Page<SimpleAccountDTO> findAll(Pageable pageable) {
 		return repository.findAll(pageable).map(x -> new SimpleAccountDTO(x));
@@ -63,6 +71,20 @@ public class AccountService {
 				accountData[1], transferLimit, loanLimitTotal, withdrawLimit);
 
 		return repository.save(accAux);
+	}
+
+	public Order deposit(DepositOrderDTO depositOrder) {
+		verifyDepositOrder(depositOrder);
+		List<Account> account = repository.findAccount(depositOrder.getAccountNumber(), depositOrder.getAccountDigit(),
+				depositOrder.getAgency(), depositOrder.getOwnerName(), depositOrder.getPassword());
+		if(account.isEmpty()) {
+			throw new ObjectNotFoundException(-1L);
+		}
+		Account acc = account.get(0);
+		acc.deposit(depositOrder.getAmount());
+		Order order = new Order(null, Instant.now(), OrderType.DEPOSIT, depositOrder.getAmount(), 0.0, acc);
+		repository.save(acc);
+		return orderService.insert(order);
 	}
 
 	public void deleteById(long id) {
@@ -111,6 +133,31 @@ public class AccountService {
 		} while (!repository.findAccount(account, digit, 1000).isEmpty());
 		int[] accountData = { account, digit };
 		return accountData;
+	}
+
+	private void verifyDepositOrder(DepositOrderDTO depositOrder) {
+		if (depositOrder.getAccountDigit() == null) {
+			throw new FieldRequiredException("Account Digit");
+		}
+		if (depositOrder.getAccountNumber() == null) {
+			throw new FieldRequiredException("Account Number");
+		}
+		if (depositOrder.getAgency() == null) {
+			throw new FieldRequiredException("Agency");
+		}
+		if (depositOrder.getAmount() == null) {
+			throw new FieldRequiredException("Amount");
+		} else {
+			if (depositOrder.getAmount() < 0) {
+				throw new NegativeValueException("Amount");
+			}
+		}
+		if (depositOrder.getOwnerName() == null) {
+			throw new FieldRequiredException("Name");
+		}
+		if (depositOrder.getPassword() == null) {
+			throw new FieldRequiredException("Password");
+		}
 	}
 
 	private void verifyAccountData(AccountCreationDTO acc) {

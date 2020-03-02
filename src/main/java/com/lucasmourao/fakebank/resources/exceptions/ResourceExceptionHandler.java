@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import com.lucasmourao.fakebank.services.exceptions.DatabaseException;
 import com.lucasmourao.fakebank.services.exceptions.FieldRequiredException;
 import com.lucasmourao.fakebank.services.exceptions.InvalidFormatException;
+import com.lucasmourao.fakebank.services.exceptions.NegativeValueException;
 import com.lucasmourao.fakebank.services.exceptions.ObjectNotFoundException;
 
 @ControllerAdvice
@@ -44,6 +45,14 @@ public class ResourceExceptionHandler {
 	@ExceptionHandler(InvalidFormatException.class)
 	public ResponseEntity<StandardError> invalidFormatException(InvalidFormatException e, HttpServletRequest request){
 		String error = "Invalid format error";
+		HttpStatus status = HttpStatus.BAD_REQUEST;
+		StandardError err = new StandardError(Instant.now(),status.value(),error,e.getMessage(),request.getRequestURI());
+		return ResponseEntity.status(status).body(err);
+	}
+	
+	@ExceptionHandler(NegativeValueException.class)
+	public ResponseEntity<StandardError> negativeValueException(NegativeValueException e, HttpServletRequest request){
+		String error = "Nagative value error";
 		HttpStatus status = HttpStatus.BAD_REQUEST;
 		StandardError err = new StandardError(Instant.now(),status.value(),error,e.getMessage(),request.getRequestURI());
 		return ResponseEntity.status(status).body(err);

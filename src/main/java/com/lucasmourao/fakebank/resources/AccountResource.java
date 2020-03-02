@@ -21,7 +21,9 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.lucasmourao.fakebank.dto.AccountCreationDTO;
 import com.lucasmourao.fakebank.dto.CompleteAccountDTO;
 import com.lucasmourao.fakebank.dto.SimpleAccountDTO;
+import com.lucasmourao.fakebank.dto.DepositOrderDTO;
 import com.lucasmourao.fakebank.entities.Account;
+import com.lucasmourao.fakebank.entities.Order;
 import com.lucasmourao.fakebank.services.AccountService;
 
 @RestController
@@ -73,6 +75,12 @@ public class AccountResource {
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(accAux.getId())
 				.toUri();
 		return ResponseEntity.created(location).body(accAux);
+	}
+	
+	@PostMapping(value="/deposit")
+	public ResponseEntity<Order> deposit(@RequestBody DepositOrderDTO depositOrder){
+		Order order = service.deposit(depositOrder);
+		return ResponseEntity.ok().body(order);
 	}
 
 	@DeleteMapping(value = "/{id}")

@@ -20,9 +20,13 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
 	Page<Account> fullSearch(@Param("ownerName") String ownerName, @Param("ownerCpf") String ownerCpf,
 			@Param("accountNumber") Integer accountNumber, @Param("accountDigit") Integer accountDigit,
 			@Param("agency") Integer agency, Pageable pageable);
-	
+
 	@Query("SELECT a FROM Account a where a.accountNumber = :accountNumber and a.accountDigit = :accountDigit and a.agency = :agency")
+	List<Account> findAccount(@Param("accountNumber") Integer accountNumber,
+			@Param("accountDigit") Integer accountDigit, @Param("agency") Integer agency);
+
+	@Query("SELECT a FROM Account a where a.accountNumber = :accountNumber and a.accountDigit = :accountDigit and a.agency = :agency and a.ownerName = :ownerName and a.password = :password")
 	List<Account> findAccount(@Param("accountNumber") Integer accountNumber, @Param("accountDigit") Integer accountDigit,
-			@Param("agency") Integer agency);
+			@Param("agency") Integer agency, @Param("ownerName") String ownerName, @Param("password") String password);
 
 }
