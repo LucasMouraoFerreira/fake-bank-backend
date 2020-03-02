@@ -14,6 +14,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.lucasmourao.fakebank.entities.enums.OrderType;
 
 @Entity
@@ -35,6 +36,7 @@ public class Order implements Serializable{
 	@NotNull
 	private Double fee;
 
+	@JsonIgnore
 	@ManyToOne
 	@JoinColumn(name="account_id", nullable=false)
 	private Account account;

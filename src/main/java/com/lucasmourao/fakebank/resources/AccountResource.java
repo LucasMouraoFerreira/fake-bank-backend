@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.lucasmourao.fakebank.dto.AccountCreationDTO;
+import com.lucasmourao.fakebank.dto.SimpleAccountDTO;
 import com.lucasmourao.fakebank.entities.Account;
 import com.lucasmourao.fakebank.services.AccountService;
 
@@ -30,10 +31,10 @@ public class AccountResource {
 	private AccountService service;
 
 	@GetMapping
-	public ResponseEntity<Page<Account>> findAll(@RequestParam(value = "page", defaultValue = "0") int page,
+	public ResponseEntity<Page<SimpleAccountDTO>> findAll(@RequestParam(value = "page", defaultValue = "0") int page,
 			@RequestParam(value = "limit", defaultValue = "10") int limit) {
 		Pageable pageable = PageRequest.of(page, limit);
-		Page<Account> list = service.findAll(pageable);
+		Page<SimpleAccountDTO> list = service.findAll(pageable);
 		return ResponseEntity.ok().body(list);
 	}
 

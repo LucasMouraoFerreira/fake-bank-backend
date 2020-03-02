@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.lucasmourao.fakebank.dto.AccountCreationDTO;
+import com.lucasmourao.fakebank.dto.SimpleAccountDTO;
 import com.lucasmourao.fakebank.entities.Account;
 import com.lucasmourao.fakebank.entities.enums.AccountType;
 import com.lucasmourao.fakebank.entities.enums.OrderType;
@@ -29,8 +30,8 @@ public class AccountService {
 	@Autowired
 	private LimitService limitService;
 
-	public Page<Account> findAll(Pageable pageable) {
-		return repository.findAll(pageable);
+	public Page<SimpleAccountDTO> findAll(Pageable pageable) {
+		return repository.findAll(pageable).map(x->new SimpleAccountDTO(x));
 	}
 
 	public Account findById(long id) {
