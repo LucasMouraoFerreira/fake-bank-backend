@@ -20,9 +20,11 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.lucasmourao.fakebank.dto.AccountCreationDTO;
 import com.lucasmourao.fakebank.dto.CompleteAccountDTO;
+import com.lucasmourao.fakebank.dto.LoanOrderRequestDTO;
 import com.lucasmourao.fakebank.dto.OrderRequestDTO;
 import com.lucasmourao.fakebank.dto.SimpleAccountDTO;
 import com.lucasmourao.fakebank.entities.Account;
+import com.lucasmourao.fakebank.entities.LoanOrder;
 import com.lucasmourao.fakebank.entities.Order;
 import com.lucasmourao.fakebank.services.AccountService;
 
@@ -86,6 +88,12 @@ public class AccountResource {
 	@PostMapping(value="/withdraw")
 	public ResponseEntity<Order> withdraw(@RequestBody OrderRequestDTO withdrawOrder){
 		Order order = service.withdraw(withdrawOrder);
+		return ResponseEntity.ok().body(order);
+	}
+	
+	@PostMapping(value="/loan")
+	public ResponseEntity<LoanOrder> withdraw(@RequestBody LoanOrderRequestDTO loanOrder){
+		LoanOrder order = service.loan(loanOrder);
 		return ResponseEntity.ok().body(order);
 	}
 

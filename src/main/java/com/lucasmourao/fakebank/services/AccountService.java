@@ -13,10 +13,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.lucasmourao.fakebank.dto.AccountCreationDTO;
+import com.lucasmourao.fakebank.dto.LoanOrderRequestDTO;
 import com.lucasmourao.fakebank.dto.OrderRequestDTO;
 import com.lucasmourao.fakebank.dto.SimpleAccountDTO;
 import com.lucasmourao.fakebank.entities.Account;
 import com.lucasmourao.fakebank.entities.Fee;
+import com.lucasmourao.fakebank.entities.LoanOrder;
 import com.lucasmourao.fakebank.entities.Order;
 import com.lucasmourao.fakebank.entities.enums.AccountType;
 import com.lucasmourao.fakebank.entities.enums.OrderType;
@@ -71,7 +73,7 @@ public class AccountService {
 		}
 		return account.get(0);
 	}
-	
+
 	public Account insertAccount(AccountCreationDTO acc) {
 
 		verifyAccountData(acc);
@@ -100,20 +102,24 @@ public class AccountService {
 	public Order withdraw(OrderRequestDTO withdrawOrder) {
 		verifyOrderRequest(withdrawOrder);
 		Account acc = findAccount(withdrawOrder);
-		Fee fee = feeService.findFee(acc.getAccountType().getCode(), OrderType.WITHDRAW.getCode());
-		Double withdrawPercentageFee = fee.getPercentage();
-		Double withdrawTotalFee = fee.getTotalValue();
-		Double amount = (withdrawOrder.getAmount() * (1.0 + withdrawPercentageFee)) + withdrawTotalFee;
-		if (acc.getBalance() < amount) {
-			throw new InsufficientBalanceException();
-		}
-		if(acc.getWithdrawLimit() < withdrawOrder.getAmount()) {
-			throw new LimitExceededException(OrderType.WITHDRAW.toString());
-		}
+		double result[] = verifyBalanceAndLimit(acc, withdrawOrder, OrderType.WITHDRAW);
+		double amount = result[0];
+		double feeTotal = result[1];
 		acc.withdraw(amount);
-		Order order = new Order(null, Instant.now(), OrderType.WITHDRAW, withdrawOrder.getAmount(),
-				(withdrawOrder.getAmount() * withdrawPercentageFee) + withdrawTotalFee, acc);
+		Order order = new Order(null, Instant.now(), OrderType.WITHDRAW, withdrawOrder.getAmount(), feeTotal, acc);
 		repository.save(acc);
+		return orderService.insert(order);
+	}
+
+	public LoanOrder loan(LoanOrderRequestDTO loanOrder) {
+		verifyLoanOrderRequest(loanOrder);
+		Account acc = findAccount(loanOrder);
+		Fee fee = feeService.findFee(acc.getAccountType().getCode(), OrderType.LOAN.getCode());
+		verifyLimit(acc, loanOrder, OrderType.LOAN);
+		acc.deposit(loanOrder.getAmount());
+		repository.save(acc);
+		LoanOrder order = new LoanOrder(null, Instant.now(), loanOrder.getAmount(), 0.0, acc, fee.getPercentage(),
+				loanOrder.getNumberOfInstallments());
 		return orderService.insert(order);
 	}
 
@@ -190,6 +196,17 @@ public class AccountService {
 		}
 	}
 
+	private void verifyLoanOrderRequest(LoanOrderRequestDTO loanOrder) {
+		verifyOrderRequest(loanOrder);
+		if (loanOrder.getNumberOfInstallments() == null) {
+			throw new FieldRequiredException("Number of installments");
+		} else {
+			if (loanOrder.getNumberOfInstallments() < 1) {
+				throw new NegativeValueException("Number of installments");
+			}
+		}
+	}
+
 	private void verifyAccountData(AccountCreationDTO acc) {
 		if (acc.getAccountType() == null) {
 			throw new FieldRequiredException("Account Type");
@@ -216,4 +233,31 @@ public class AccountService {
 			throw new InvalidFormatException("Name must contain only letters.");
 		}
 	}
+
+	private double[] verifyBalanceAndLimit(Account acc, OrderRequestDTO orderRequest, OrderType orderType) {
+		Fee fee = feeService.findFee(acc.getAccountType().getCode(), OrderType.WITHDRAW.getCode());
+		Double withdrawPercentageFee = fee.getPercentage();
+		Double withdrawTotalFee = fee.getTotalValue();
+		Double amount = (orderRequest.getAmount() * (1.0 + withdrawPercentageFee)) + withdrawTotalFee;
+		if (acc.getBalance() < amount) {
+			throw new InsufficientBalanceException();
+		}
+		verifyLimit(acc, orderRequest, orderType);
+		double feeTotal = (orderRequest.getAmount() * withdrawPercentageFee) + withdrawTotalFee;
+		double[] result = { amount, feeTotal };
+		return result;
+	}
+
+	private void verifyLimit(Account acc, OrderRequestDTO orderRequest, OrderType orderType) {
+		if (orderRequest instanceof LoanOrderRequestDTO) {
+			if (acc.getLoanLimitCurrent() < orderRequest.getAmount()) {
+				throw new LimitExceededException(orderType.toString());
+			}
+		} else {
+			if (acc.getWithdrawLimit() < orderRequest.getAmount()) {
+				throw new LimitExceededException(orderType.toString());
+			}
+		}
+	}
+
 }

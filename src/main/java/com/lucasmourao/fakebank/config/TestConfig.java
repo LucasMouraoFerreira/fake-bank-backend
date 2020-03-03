@@ -46,11 +46,11 @@ public class TestConfig implements CommandLineRunner {
 				true, AccountType.PREMIUM, 5, 5000.0, 50000.0, 2500.0);
 		accountRepository.saveAll(Arrays.asList(acc1, acc2));
 
-		Fee f1 = new Fee(null, "Transfer Fee - Standard", "Transfer fee for a standard account", 0.0, 7.0,
-				AccountType.STANDARD, OrderType.TRANSFER);
+		Fee f1 = new Fee(null, "Loan Fee - Premium", "Loan fee for a Premium account", 0.15, 0.0,
+				AccountType.PREMIUM, OrderType.LOAN);
 		Fee f2 = new Fee(null, "Transfer Fee - Premium", "Transfer fee for a Premium account", 0.0, 8.0,
 				AccountType.PREMIUM, OrderType.TRANSFER);
-		Fee f3 = new Fee(null, "Transfer Fee - Premium", "Withdraw fee for a Premium account", 0.0, 5.0,
+		Fee f3 = new Fee(null, "Withdraw Fee - Premium", "Withdraw fee for a Premium account", 0.0, 5.0,
 				AccountType.PREMIUM, OrderType.WITHDRAW);
 		feeRepository.saveAll(Arrays.asList(f1, f2, f3));
 
