@@ -7,7 +7,9 @@ public enum OrderType {
 	TRANSFER(2),
 	LOAN(3),
 	CARD_ANNUITY(4),
-	MONTHLY_FEE(5);
+	MONTHLY_FEE(5),
+	TRANSFER_RECEIVED(6);
+;
 
 	private int code;
 	

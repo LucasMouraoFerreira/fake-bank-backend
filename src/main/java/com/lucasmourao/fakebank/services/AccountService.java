@@ -1,6 +1,7 @@
 package com.lucasmourao.fakebank.services;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -16,10 +17,12 @@ import com.lucasmourao.fakebank.dto.AccountCreationDTO;
 import com.lucasmourao.fakebank.dto.LoanOrderRequestDTO;
 import com.lucasmourao.fakebank.dto.OrderRequestDTO;
 import com.lucasmourao.fakebank.dto.SimpleAccountDTO;
+import com.lucasmourao.fakebank.dto.TransferOrderRequestDTO;
 import com.lucasmourao.fakebank.entities.Account;
 import com.lucasmourao.fakebank.entities.Fee;
 import com.lucasmourao.fakebank.entities.LoanOrder;
 import com.lucasmourao.fakebank.entities.Order;
+import com.lucasmourao.fakebank.entities.TransferOrder;
 import com.lucasmourao.fakebank.entities.enums.AccountType;
 import com.lucasmourao.fakebank.entities.enums.OrderType;
 import com.lucasmourao.fakebank.repositories.AccountRepository;
@@ -74,6 +77,25 @@ public class AccountService {
 		return account.get(0);
 	}
 
+	public List<Account> findAccount(TransferOrderRequestDTO orderRequest) {
+		List<Account> receivingAccount = repository.findAccount(orderRequest.getReceivingAccountNumber(),
+				orderRequest.getReceivingAccountDigit(), orderRequest.getReceivingAccountAgency(),
+				orderRequest.getReceivingAccountOwnerCpf());
+		if (receivingAccount.isEmpty()) {
+			throw new ObjectNotFoundException(-1L);
+		}
+		List<Account> account = repository.findAccount(orderRequest.getAccountNumber(), orderRequest.getAccountDigit(),
+				orderRequest.getAgency(), orderRequest.getOwnerName(), orderRequest.getPassword());
+		if (account.isEmpty()) {
+			throw new ObjectNotFoundException(-1L);
+		}
+		account.add(receivingAccount.get(0));
+		if(account.size()>2) {
+			throw new DatabaseException("Database integrity error");
+		}
+		return account;
+	}
+
 	public Account insertAccount(AccountCreationDTO acc) {
 
 		verifyAccountData(acc);
@@ -120,6 +142,23 @@ public class AccountService {
 		repository.save(acc);
 		LoanOrder order = new LoanOrder(null, Instant.now(), loanOrder.getAmount(), 0.0, acc, fee.getPercentage(),
 				loanOrder.getNumberOfInstallments());
+		return orderService.insert(order);
+	}
+	
+	public TransferOrder transfer(TransferOrderRequestDTO transferOrder) {
+		verifyTransferOrderRequest(transferOrder);
+		List<Account> accounts = findAccount(transferOrder);
+		Account receivingAcc = accounts.get(1);
+		Account acc = accounts.get(0);
+		double result[] = verifyBalanceAndLimit(acc, transferOrder, OrderType.TRANSFER);
+		double amount = result[0];
+		double feeTotal = result[1];
+		acc.withdraw(amount);
+		receivingAcc.deposit(transferOrder.getAmount());
+		repository.saveAll(Arrays.asList(acc,receivingAcc));
+		TransferOrder order = new TransferOrder(null,Instant.now(),transferOrder.getAmount(),feeTotal,acc,receivingAcc.getId());
+		Order receivedOrder = new Order(null,Instant.now(),OrderType.TRANSFER_RECEIVED,transferOrder.getAmount(),0.0,receivingAcc);
+		orderService.insert(receivedOrder);
 		return orderService.insert(order);
 	}
 
@@ -196,6 +235,22 @@ public class AccountService {
 		}
 	}
 
+	private void verifyTransferOrderRequest(TransferOrderRequestDTO transferOrder) {
+		verifyOrderRequest(transferOrder);
+		if(transferOrder.getReceivingAccountAgency()==null) {
+			throw new FieldRequiredException("Receiving account agency");
+		}
+		if(transferOrder.getReceivingAccountDigit()==null) {
+			throw new FieldRequiredException("Receiving account digit");
+		}
+		if(transferOrder.getReceivingAccountNumber()==null) {
+			throw new FieldRequiredException("Receiving account number");
+		}
+		if(transferOrder.getReceivingAccountOwnerCpf()==null) {
+			throw new FieldRequiredException("Receiving account owner CPF");
+		}
+	}
+	
 	private void verifyLoanOrderRequest(LoanOrderRequestDTO loanOrder) {
 		verifyOrderRequest(loanOrder);
 		if (loanOrder.getNumberOfInstallments() == null) {
@@ -235,7 +290,7 @@ public class AccountService {
 	}
 
 	private double[] verifyBalanceAndLimit(Account acc, OrderRequestDTO orderRequest, OrderType orderType) {
-		Fee fee = feeService.findFee(acc.getAccountType().getCode(), OrderType.WITHDRAW.getCode());
+		Fee fee = feeService.findFee(acc.getAccountType().getCode(), orderType.getCode());
 		Double withdrawPercentageFee = fee.getPercentage();
 		Double withdrawTotalFee = fee.getTotalValue();
 		Double amount = (orderRequest.getAmount() * (1.0 + withdrawPercentageFee)) + withdrawTotalFee;
@@ -251,6 +306,10 @@ public class AccountService {
 	private void verifyLimit(Account acc, OrderRequestDTO orderRequest, OrderType orderType) {
 		if (orderRequest instanceof LoanOrderRequestDTO) {
 			if (acc.getLoanLimitCurrent() < orderRequest.getAmount()) {
+				throw new LimitExceededException(orderType.toString());
+			}
+		} else if (orderRequest instanceof TransferOrderRequestDTO) {
+			if (acc.getTransferLimit() < orderRequest.getAmount()) {
 				throw new LimitExceededException(orderType.toString());
 			}
 		} else {

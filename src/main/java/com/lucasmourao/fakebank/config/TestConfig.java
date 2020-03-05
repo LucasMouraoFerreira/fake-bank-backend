@@ -48,7 +48,7 @@ public class TestConfig implements CommandLineRunner {
 
 		Fee f1 = new Fee(null, "Loan Fee - Premium", "Loan fee for a Premium account", 0.15, 0.0,
 				AccountType.PREMIUM, OrderType.LOAN);
-		Fee f2 = new Fee(null, "Transfer Fee - Premium", "Transfer fee for a Premium account", 0.0, 8.0,
+		Fee f2 = new Fee(null, "Transfer Fee - Premium", "Transfer fee for a Premium account", 0.003, 8.0,
 				AccountType.PREMIUM, OrderType.TRANSFER);
 		Fee f3 = new Fee(null, "Withdraw Fee - Premium", "Withdraw fee for a Premium account", 0.0, 5.0,
 				AccountType.PREMIUM, OrderType.WITHDRAW);

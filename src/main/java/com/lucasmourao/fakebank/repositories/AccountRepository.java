@@ -29,4 +29,8 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
 	List<Account> findAccount(@Param("accountNumber") Integer accountNumber, @Param("accountDigit") Integer accountDigit,
 			@Param("agency") Integer agency, @Param("ownerName") String ownerName, @Param("password") String password);
 
+	@Query("SELECT a FROM Account a where a.accountNumber = :accountNumber and a.accountDigit = :accountDigit and a.agency = :agency and a.ownerCpf = :ownerCpf")
+	List<Account> findAccount(@Param("accountNumber") Integer accountNumber,
+			@Param("accountDigit") Integer accountDigit, @Param("agency") Integer agency, @Param("ownerCpf") String ownerCpf);
+
 }

@@ -23,9 +23,11 @@ import com.lucasmourao.fakebank.dto.CompleteAccountDTO;
 import com.lucasmourao.fakebank.dto.LoanOrderRequestDTO;
 import com.lucasmourao.fakebank.dto.OrderRequestDTO;
 import com.lucasmourao.fakebank.dto.SimpleAccountDTO;
+import com.lucasmourao.fakebank.dto.TransferOrderRequestDTO;
 import com.lucasmourao.fakebank.entities.Account;
 import com.lucasmourao.fakebank.entities.LoanOrder;
 import com.lucasmourao.fakebank.entities.Order;
+import com.lucasmourao.fakebank.entities.TransferOrder;
 import com.lucasmourao.fakebank.services.AccountService;
 
 @RestController
@@ -92,8 +94,14 @@ public class AccountResource {
 	}
 	
 	@PostMapping(value="/loan")
-	public ResponseEntity<LoanOrder> withdraw(@RequestBody LoanOrderRequestDTO loanOrder){
+	public ResponseEntity<LoanOrder> loan(@RequestBody LoanOrderRequestDTO loanOrder){
 		LoanOrder order = service.loan(loanOrder);
+		return ResponseEntity.ok().body(order);
+	}
+	
+	@PostMapping(value="/transfer")
+	public ResponseEntity<TransferOrder> transfer(@RequestBody TransferOrderRequestDTO transferOrder){
+		TransferOrder order = service.transfer(transferOrder);
 		return ResponseEntity.ok().body(order);
 	}
 
