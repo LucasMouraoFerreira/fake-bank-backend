@@ -90,7 +90,7 @@ public class AccountService {
 			throw new ObjectNotFoundException(-1L);
 		}
 		account.add(receivingAccount.get(0));
-		if(account.size()>2) {
+		if (account.size() > 2) {
 			throw new DatabaseException("Database integrity error");
 		}
 		return account;
@@ -144,7 +144,7 @@ public class AccountService {
 				loanOrder.getNumberOfInstallments());
 		return orderService.insert(order);
 	}
-	
+
 	public TransferOrder transfer(TransferOrderRequestDTO transferOrder) {
 		verifyTransferOrderRequest(transferOrder);
 		List<Account> accounts = findAccount(transferOrder);
@@ -155,9 +155,11 @@ public class AccountService {
 		double feeTotal = result[1];
 		acc.withdraw(amount);
 		receivingAcc.deposit(transferOrder.getAmount());
-		repository.saveAll(Arrays.asList(acc,receivingAcc));
-		TransferOrder order = new TransferOrder(null,Instant.now(),transferOrder.getAmount(),feeTotal,acc,receivingAcc.getId());
-		Order receivedOrder = new Order(null,Instant.now(),OrderType.TRANSFER_RECEIVED,transferOrder.getAmount(),0.0,receivingAcc);
+		repository.saveAll(Arrays.asList(acc, receivingAcc));
+		TransferOrder order = new TransferOrder(null, Instant.now(), transferOrder.getAmount(), feeTotal, acc,
+				receivingAcc.getId());
+		Order receivedOrder = new Order(null, Instant.now(), OrderType.TRANSFER_RECEIVED, transferOrder.getAmount(),
+				0.0, receivingAcc);
 		orderService.insert(receivedOrder);
 		return orderService.insert(order);
 	}
@@ -198,15 +200,28 @@ public class AccountService {
 		return repository.save(accAux);
 	}
 
+	private void accountMonthlyFee(Account acc) {
+		Fee cardAnnuityFee = feeService.findFee(acc.getAccountType().getCode(), OrderType.CARD_ANNUITY.getCode());
+		Fee accountMonthlyFee = feeService.findFee(acc.getAccountType().getCode(), OrderType.MONTHLY_FEE.getCode());
+		Order cardAnnuityOrder = new Order(null, Instant.now(), OrderType.CARD_ANNUITY,
+				cardAnnuityFee.getTotalValue() / 12, 0.0, acc);
+		Order accountMonthlyOrder = new Order(null, Instant.now(), OrderType.MONTHLY_FEE,
+				accountMonthlyFee.getTotalValue(), 0.0, acc);
+		acc.deposit(accountMonthlyOrder.getBaseValue() + cardAnnuityOrder.getBaseValue());
+		orderService.insert(accountMonthlyOrder);
+		orderService.insert(cardAnnuityOrder);
+		repository.save(acc);
+	}
+
 	private int[] generateAccount() {
 		Random random = new Random();
-		int digit = 0;
-		int account = 0;
+		int accountDigit = 0;
+		int accountNumber = 0;
 		do {
-			digit = random.ints(0, 10).findFirst().getAsInt();
-			account = random.ints(0, 100000).findFirst().getAsInt();
-		} while (!repository.findAccount(account, digit, 1000).isEmpty());
-		int[] accountData = { account, digit };
+			accountDigit = random.ints(0, 10).findFirst().getAsInt();
+			accountNumber = random.ints(0, 100000).findFirst().getAsInt();
+		} while (!repository.findAccount(accountNumber, accountDigit, 1000).isEmpty());
+		int[] accountData = { accountNumber, accountDigit };
 		return accountData;
 	}
 
@@ -237,20 +252,20 @@ public class AccountService {
 
 	private void verifyTransferOrderRequest(TransferOrderRequestDTO transferOrder) {
 		verifyOrderRequest(transferOrder);
-		if(transferOrder.getReceivingAccountAgency()==null) {
+		if (transferOrder.getReceivingAccountAgency() == null) {
 			throw new FieldRequiredException("Receiving account agency");
 		}
-		if(transferOrder.getReceivingAccountDigit()==null) {
+		if (transferOrder.getReceivingAccountDigit() == null) {
 			throw new FieldRequiredException("Receiving account digit");
 		}
-		if(transferOrder.getReceivingAccountNumber()==null) {
+		if (transferOrder.getReceivingAccountNumber() == null) {
 			throw new FieldRequiredException("Receiving account number");
 		}
-		if(transferOrder.getReceivingAccountOwnerCpf()==null) {
+		if (transferOrder.getReceivingAccountOwnerCpf() == null) {
 			throw new FieldRequiredException("Receiving account owner CPF");
 		}
 	}
-	
+
 	private void verifyLoanOrderRequest(LoanOrderRequestDTO loanOrder) {
 		verifyOrderRequest(loanOrder);
 		if (loanOrder.getNumberOfInstallments() == null) {
