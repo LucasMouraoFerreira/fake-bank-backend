@@ -12,6 +12,7 @@ import com.lucasmourao.fakebank.entities.Account;
 import com.lucasmourao.fakebank.entities.Fee;
 import com.lucasmourao.fakebank.entities.Limit;
 import com.lucasmourao.fakebank.entities.LoanOrder;
+import com.lucasmourao.fakebank.entities.LoanRate;
 import com.lucasmourao.fakebank.entities.Order;
 import com.lucasmourao.fakebank.entities.TransferOrder;
 import com.lucasmourao.fakebank.entities.enums.AccountType;
@@ -19,6 +20,7 @@ import com.lucasmourao.fakebank.entities.enums.OrderType;
 import com.lucasmourao.fakebank.repositories.AccountRepository;
 import com.lucasmourao.fakebank.repositories.FeeRepository;
 import com.lucasmourao.fakebank.repositories.LimitRepository;
+import com.lucasmourao.fakebank.repositories.LoanRateRepository;
 import com.lucasmourao.fakebank.repositories.OrderRepository;
 
 @Configuration
@@ -36,6 +38,9 @@ public class TestConfig implements CommandLineRunner {
 
 	@Autowired
 	private LimitRepository limitRepository;
+	
+	@Autowired
+	private LoanRateRepository loanRateRepository;
 
 	@Override
 	public void run(String... agrs) throws Exception {
@@ -69,6 +74,11 @@ public class TestConfig implements CommandLineRunner {
 		Limit l2 = new Limit(null, OrderType.WITHDRAW, AccountType.PREMIUM, 2500.00);
 		Limit l3 = new Limit(null, OrderType.TRANSFER, AccountType.PREMIUM, 5000.00);
 		limitRepository.saveAll(Arrays.asList(l1, l2, l3));
+		
+		LoanRate lr1 = new LoanRate(null,AccountType.PREMIUM,0.10);
+		LoanRate lr2 = new LoanRate(null,AccountType.STANDARD,0.15);
+		LoanRate lr3 = new LoanRate(null,AccountType.STUDENT,0.20);
+		loanRateRepository.saveAll(Arrays.asList(lr1,lr2,lr3));
 
 	}
 }
