@@ -11,6 +11,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.lucasmourao.fakebank.dto.AccountCreationDTO;
@@ -164,6 +165,15 @@ public class AccountService {
 		return orderService.insert(order);
 	}
 
+
+	@Scheduled(cron = "0 0 21 7 * ?", zone = "GMT") // Runs once a month on the 7th at 9pm - GMT  //[Seconds] [Minutes] [Hours] [Day of month] [Month] [Day of week] [Year]
+	private void chargeAccountsMonthly() {
+		List<Account> accounts = repository.findAll();
+		for(Account acc : accounts) {
+			accountMonthlyFee(acc);
+		}
+	}
+	
 	public void deleteById(long id) {
 		try {
 			repository.deleteById(id);
@@ -199,7 +209,7 @@ public class AccountService {
 
 		return repository.save(accAux);
 	}
-
+	
 	private void accountMonthlyFee(Account acc) {
 		Fee cardAnnuityFee = feeService.findFee(acc.getAccountType().getCode(), OrderType.CARD_ANNUITY.getCode());
 		Fee accountMonthlyFee = feeService.findFee(acc.getAccountType().getCode(), OrderType.MONTHLY_FEE.getCode());
@@ -207,7 +217,7 @@ public class AccountService {
 				cardAnnuityFee.getTotalValue() / 12, 0.0, acc);
 		Order accountMonthlyOrder = new Order(null, Instant.now(), OrderType.MONTHLY_FEE,
 				accountMonthlyFee.getTotalValue(), 0.0, acc);
-		acc.deposit(accountMonthlyOrder.getBaseValue() + cardAnnuityOrder.getBaseValue());
+		acc.withdraw(accountMonthlyOrder.getBaseValue() + cardAnnuityOrder.getBaseValue());
 		orderService.insert(accountMonthlyOrder);
 		orderService.insert(cardAnnuityOrder);
 		repository.save(acc);
