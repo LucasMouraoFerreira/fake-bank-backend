@@ -23,6 +23,7 @@ import com.lucasmourao.fakebank.dto.TransferOrderRequestDTO;
 import com.lucasmourao.fakebank.entities.Account;
 import com.lucasmourao.fakebank.entities.Fee;
 import com.lucasmourao.fakebank.entities.LoanOrder;
+import com.lucasmourao.fakebank.entities.LoanRate;
 import com.lucasmourao.fakebank.entities.Order;
 import com.lucasmourao.fakebank.entities.TransferOrder;
 import com.lucasmourao.fakebank.entities.enums.AccountType;
@@ -50,6 +51,9 @@ public class AccountService {
 
 	@Autowired
 	private FeeService feeService;
+	
+	@Autowired
+	private LoanRateService loanRateService;
 
 	public Page<SimpleAccountDTO> findAll(Pageable pageable) {
 		return repository.findAll(pageable).map(x -> new SimpleAccountDTO(x));
@@ -138,12 +142,12 @@ public class AccountService {
 	public LoanOrder loan(LoanOrderRequestDTO loanOrder) {
 		verifyLoanOrderRequest(loanOrder);
 		Account acc = findAccount(loanOrder);
-		Fee fee = feeService.findFee(acc.getAccountType().getCode(), OrderType.LOAN.getCode());
+		LoanRate loanRate = loanRateService.findLoanRate(acc.getAccountType().getCode());
 		verifyLimit(acc, loanOrder, OrderType.LOAN);
 		acc.deposit(loanOrder.getAmount());
 		acc.decreaseLoanLimitCurrent(loanOrder.getAmount());
 		repository.save(acc);
-		LoanOrder order = new LoanOrder(null, Instant.now(), loanOrder.getAmount(), 0.0, acc, fee.getPercentage(),
+		LoanOrder order = new LoanOrder(null, Instant.now(), loanOrder.getAmount(), 0.0, acc, loanRate.getRate(),
 				loanOrder.getNumberOfInstallments());
 		return orderService.insert(order);
 	}
