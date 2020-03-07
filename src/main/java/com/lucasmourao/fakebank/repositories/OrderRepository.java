@@ -1,6 +1,7 @@
 package com.lucasmourao.fakebank.repositories;
 
 import java.time.Instant;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,4 +22,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 	@Query("SELECT o FROM Order o where o.account = :account and o.moment <= :finalDate and o.moment >= :initialDate")
 	Page<Order> fullSearch(@Param("account") Account account,@Param("initialDate") Instant initialDate, @Param("finalDate") Instant finalDate,
 			Pageable pageable);
+	
+	List<Order> findByOrderType(Integer orderType);
 }

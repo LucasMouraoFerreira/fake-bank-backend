@@ -8,10 +8,10 @@ import javax.validation.constraints.NotNull;
 import com.lucasmourao.fakebank.entities.enums.OrderType;
 
 @Entity
-public class LoanOrder extends Order{
+public class LoanOrder extends Order {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	@NotNull
 	private Double rate;
 	@NotNull
@@ -22,13 +22,13 @@ public class LoanOrder extends Order{
 	private Integer paidInstallments;
 	@NotNull
 	private Double amountPerInstallment;
-	
+
 	public LoanOrder() {
 		super();
 	}
 
-	public LoanOrder(Long id, Instant moment, Double baseValue, Double fee, Account account,
-			Double rate, Integer numberOfInstallments) {
+	public LoanOrder(Long id, Instant moment, Double baseValue, Double fee, Account account, Double rate,
+			Integer numberOfInstallments) {
 		super(id, moment, OrderType.LOAN, baseValue, fee, account);
 		this.rate = rate;
 		setDebtTotalAmount();
@@ -50,7 +50,7 @@ public class LoanOrder extends Order{
 	}
 
 	public void setDebtTotalAmount() {
-		debtTotalAmount = (rate+1)*super.getBaseValue();
+		debtTotalAmount = (rate + 1) * super.getBaseValue();
 	}
 
 	public Integer getNumberOfInstallments() {
@@ -65,8 +65,8 @@ public class LoanOrder extends Order{
 		return paidInstallments;
 	}
 
-	public void setPaidInstallments(Integer paidInstallments) {
-		this.paidInstallments = paidInstallments;
+	public void incremetPaidInstallments() {
+		this.paidInstallments++;
 	}
 
 	public Double getAmountPerInstallment() {
@@ -74,7 +74,7 @@ public class LoanOrder extends Order{
 	}
 
 	public void setAmountPerInstallment() {
-		amountPerInstallment = debtTotalAmount/numberOfInstallments;
-	}	
+		amountPerInstallment = debtTotalAmount / numberOfInstallments;
+	}
 	
 }

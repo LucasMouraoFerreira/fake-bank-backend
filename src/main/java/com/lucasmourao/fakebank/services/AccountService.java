@@ -1,6 +1,7 @@
 package com.lucasmourao.fakebank.services;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -140,6 +141,7 @@ public class AccountService {
 		Fee fee = feeService.findFee(acc.getAccountType().getCode(), OrderType.LOAN.getCode());
 		verifyLimit(acc, loanOrder, OrderType.LOAN);
 		acc.deposit(loanOrder.getAmount());
+		acc.decreaseLoanLimitCurrent(loanOrder.getAmount());
 		repository.save(acc);
 		LoanOrder order = new LoanOrder(null, Instant.now(), loanOrder.getAmount(), 0.0, acc, fee.getPercentage(),
 				loanOrder.getNumberOfInstallments());
@@ -165,15 +167,32 @@ public class AccountService {
 		return orderService.insert(order);
 	}
 
-
-	@Scheduled(cron = "0 0 21 7 * ?", zone = "GMT") // Runs once a month on the 7th at 9pm - GMT  //[Seconds] [Minutes] [Hours] [Day of month] [Month] [Day of week] [Year]
+	@Scheduled(cron = "0 0 21 7 * ?", zone = "GMT") // Runs once a month on the 7th at 9pm - GMT //[Seconds] [Minutes]
+													// [Hours] [Day of month] [Month] [Day of week] [Year]
 	private void chargeAccountsMonthly() {
 		List<Account> accounts = repository.findAll();
-		for(Account acc : accounts) {
+		for (Account acc : accounts) {
 			accountMonthlyFee(acc);
 		}
 	}
-	
+
+	@Scheduled(cron = "0 0 21 7 * ?", zone = "GMT") // Runs once a month on the 7th at 9pm - GMT //[Seconds] [Minutes]
+													// [Hours] [Day of month] [Month] [Day of week] [Year]
+	private void loanMonthlyCharge() {
+		List<Order> loanOrders = orderService.findByOrderType(OrderType.LOAN.getCode());
+		for (Order loanOrder : loanOrders) {
+			long daysSinceOrderCreation = loanOrder.getMoment().until(Instant.now(), ChronoUnit.DAYS);
+			if (daysSinceOrderCreation >= 30 && ((LoanOrder) loanOrder).getPaidInstallments() < ((LoanOrder) loanOrder)
+					.getNumberOfInstallments()) {
+				((LoanOrder) loanOrder).incremetPaidInstallments();
+				loanOrder.getAccount().withdraw(((LoanOrder) loanOrder).getAmountPerInstallment());
+				loanOrder.getAccount().increaseLoanLimitCurrent(((LoanOrder) loanOrder).getAmountPerInstallment());
+				orderService.saveLoanOrder((LoanOrder) loanOrder);
+				repository.save(loanOrder.getAccount());
+			}
+		}
+	}
+
 	public void deleteById(long id) {
 		try {
 			repository.deleteById(id);
@@ -209,7 +228,7 @@ public class AccountService {
 
 		return repository.save(accAux);
 	}
-	
+
 	private void accountMonthlyFee(Account acc) {
 		Fee cardAnnuityFee = feeService.findFee(acc.getAccountType().getCode(), OrderType.CARD_ANNUITY.getCode());
 		Fee accountMonthlyFee = feeService.findFee(acc.getAccountType().getCode(), OrderType.MONTHLY_FEE.getCode());

@@ -1,6 +1,7 @@
 package com.lucasmourao.fakebank.services;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,7 @@ public class OrderService {
 
 	@Autowired
 	private OrderRepository orderRepository;
-	
+
 	public Page<Order> findAll(Pageable pageable) {
 		return orderRepository.findAll(pageable);
 	}
@@ -32,19 +33,20 @@ public class OrderService {
 		Optional<Order> order = orderRepository.findById(id);
 		return order.orElseThrow(() -> new ObjectNotFoundException(id));
 	}
-	
-	public Page<Order> fullSearch(Account account, Integer orderType,
-			Instant initialDate, Instant finalDate,
-			Pageable pageable){
+
+	public Page<Order> fullSearch(Account account, Integer orderType, Instant initialDate, Instant finalDate,
+			Pageable pageable) {
 		return orderRepository.fullSearch(account, orderType, initialDate, finalDate, pageable);
 	}
-	
-	public Page<Order> fullSearch(Account account,
-			Instant initialDate, Instant finalDate,
-			Pageable pageable){
+
+	public Page<Order> fullSearch(Account account, Instant initialDate, Instant finalDate, Pageable pageable) {
 		return orderRepository.fullSearch(account, initialDate, finalDate, pageable);
 	}
 	
+	public List<Order> findByOrderType(Integer orderType){
+		return orderRepository.findByOrderType(orderType);
+	}
+
 	public Order insert(Order order) {
 		return orderRepository.save(order);
 	}
@@ -52,18 +54,23 @@ public class OrderService {
 	public LoanOrder insert(LoanOrder order) {
 		return orderRepository.save(order);
 	}
-	
+
 	public TransferOrder insert(TransferOrder order) {
 		return orderRepository.save(order);
 	}
-	
+
 	public void delete(long id) {
-		try {		
-		orderRepository.deleteById(id);
-		}catch (EmptyResultDataAccessException e) {
+		try {
+			orderRepository.deleteById(id);
+		} catch (EmptyResultDataAccessException e) {
 			throw new ObjectNotFoundException(id);
-		}catch (DataIntegrityViolationException e) {
+		} catch (DataIntegrityViolationException e) {
 			throw new DatabaseException(e.getMessage());
 		}
 	}
+	
+	public void saveLoanOrder(LoanOrder order) {
+		orderRepository.save(order);
+	}
+
 }

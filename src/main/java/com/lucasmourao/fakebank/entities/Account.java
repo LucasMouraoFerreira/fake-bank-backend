@@ -237,4 +237,12 @@ public class Account implements Serializable {
 	public void withdraw(double amount) {
 		balance -= amount;
 	}
+	
+	public void increaseLoanLimitCurrent(double amount) {
+		loanLimitCurrent += amount;
+	}
+	
+	public void decreaseLoanLimitCurrent(double amount) {
+		loanLimitCurrent -= amount;
+	}
 }

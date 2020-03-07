@@ -62,7 +62,8 @@ public class TestConfig implements CommandLineRunner {
 		Order od2 = new Order(null, Instant.now(), OrderType.WITHDRAW, 300.00, 5.0, acc2);
 		Order od3 = new TransferOrder(null, Instant.now(), 500.00, 7.00, acc1, acc2.getId());
 		Order od4 = new LoanOrder(null, Instant.now(), 600.00, 0.0, acc2, 0.5, 3);
-		orderRepository.saveAll(Arrays.asList(od1, od2, od3, od4));
+		Order od5 = new LoanOrder(null, Instant.parse("2020-02-02T00:00:00Z"), 600.00, 0.0, acc2, 0.5, 3);
+		orderRepository.saveAll(Arrays.asList(od1, od2, od3, od4, od5));
 
 		Limit l1 = new Limit(null, OrderType.LOAN, AccountType.PREMIUM, 50000.00);
 		Limit l2 = new Limit(null, OrderType.WITHDRAW, AccountType.PREMIUM, 2500.00);
