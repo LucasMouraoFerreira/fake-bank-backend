@@ -240,6 +240,9 @@ public class Account implements Serializable {
 	
 	public void increaseLoanLimitCurrent(double amount) {
 		loanLimitCurrent += amount;
+		if(loanLimitCurrent>loanLimitTotal) {
+			loanLimitCurrent = loanLimitTotal;
+		}
 	}
 	
 	public void decreaseLoanLimitCurrent(double amount) {

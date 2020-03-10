@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.lucasmourao.fakebank.dto.AccountCreationDTO;
+import com.lucasmourao.fakebank.dto.AccountLimitsDTO;
 import com.lucasmourao.fakebank.dto.CompleteAccountDTO;
 import com.lucasmourao.fakebank.dto.LoanOrderRequestDTO;
 import com.lucasmourao.fakebank.dto.OrderRequestDTO;
@@ -112,8 +113,14 @@ public class AccountResource {
 	}
 
 	@PutMapping(value = "/{id}")
-	public ResponseEntity<Account> updateAccount(@PathVariable long id, @RequestBody Account acc) {
-		acc = service.updateAccount(id, acc);
+	public ResponseEntity<CompleteAccountDTO> updateAccount(@PathVariable long id, @RequestBody Account acc) {
+		CompleteAccountDTO account = service.updateAccount(id, acc);
+		return ResponseEntity.ok().body(account);
+	}
+	
+	@PutMapping(value = "updatelimits/{id}")
+	public ResponseEntity<CompleteAccountDTO> updateAccountLimits(@PathVariable long id, @RequestBody AccountLimitsDTO accountLimits) {
+		CompleteAccountDTO acc = service.updateAccountLimits(id, accountLimits);
 		return ResponseEntity.ok().body(acc);
 	}
 

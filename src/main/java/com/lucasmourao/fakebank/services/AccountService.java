@@ -16,6 +16,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.lucasmourao.fakebank.dto.AccountCreationDTO;
+import com.lucasmourao.fakebank.dto.AccountLimitsDTO;
+import com.lucasmourao.fakebank.dto.CompleteAccountDTO;
 import com.lucasmourao.fakebank.dto.LoanOrderRequestDTO;
 import com.lucasmourao.fakebank.dto.OrderRequestDTO;
 import com.lucasmourao.fakebank.dto.SimpleAccountDTO;
@@ -51,7 +53,7 @@ public class AccountService {
 
 	@Autowired
 	private FeeService feeService;
-	
+
 	@Autowired
 	private LoanRateService loanRateService;
 
@@ -207,9 +209,14 @@ public class AccountService {
 		}
 	}
 
-	public Account updateAccount(long id, Account acc) {
+	public CompleteAccountDTO updateAccount(long id, Account acc) {
 		Optional<Account> accAux = repository.findById(id);
-		return updateData(accAux.orElseThrow(() -> new ObjectNotFoundException(id)), acc);
+		return new CompleteAccountDTO(updateData(accAux.orElseThrow(() -> new ObjectNotFoundException(id)), acc));
+	}
+
+	public CompleteAccountDTO updateAccountLimits(long id, AccountLimitsDTO accountLimits) {
+		Account acc = findById(id);
+		return new CompleteAccountDTO(UpdateLimitsData(acc, accountLimits));
 	}
 
 	private Account updateData(Account accAux, Account acc) {
@@ -231,6 +238,22 @@ public class AccountService {
 		}
 
 		return repository.save(accAux);
+	}
+
+	private Account UpdateLimitsData(Account acc, AccountLimitsDTO accountLimits) {
+		if (accountLimits.getLoanLimitTotal() != null && accountLimits.getLoanLimitTotal() > 0.0) {
+			acc.setLoanLimitTotal(accountLimits.getLoanLimitTotal());
+			if (acc.getLoanLimitCurrent() > acc.getLoanLimitTotal()) {
+				acc.setLoanLimitCurrent(acc.getLoanLimitTotal());
+			}
+		}
+		if (accountLimits.getTransferLimit() != null && accountLimits.getTransferLimit() > 0.0) {
+			acc.setTransferLimit(accountLimits.getTransferLimit());
+		}
+		if (accountLimits.getWithdrawLimit() != null && accountLimits.getWithdrawLimit() > 0.0) {
+			acc.setWithdrawLimit(accountLimits.getWithdrawLimit());
+		}
+		return repository.save(acc);
 	}
 
 	private void accountMonthlyFee(Account acc) {
