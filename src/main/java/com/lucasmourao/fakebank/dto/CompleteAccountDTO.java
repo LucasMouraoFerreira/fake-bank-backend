@@ -3,6 +3,7 @@ package com.lucasmourao.fakebank.dto;
 import java.io.Serializable;
 
 import com.lucasmourao.fakebank.entities.Account;
+import com.lucasmourao.fakebank.entities.User;
 import com.lucasmourao.fakebank.entities.enums.AccountType;
 
 public class CompleteAccountDTO implements Serializable{
@@ -18,7 +19,6 @@ public class CompleteAccountDTO implements Serializable{
 	private AccountType accountType;
 	private String ownerAddress;
 	private Double balance;
-	private Boolean accountActive;
 	private Double transferLimit;
 	private Double loanLimitTotal;
 	private Double loanLimitCurrent;
@@ -27,16 +27,33 @@ public class CompleteAccountDTO implements Serializable{
 	public CompleteAccountDTO() {}
 
 	public CompleteAccountDTO(Account acc) {
+		User user = acc.getUser();
 		this.id = acc.getId();
 		this.accountNumber = acc.getAccountNumber();
 		this.accountDigit = acc.getAccountDigit();
 		this.agency = acc.getAgency();
-		this.ownerName = acc.getOwnerName();
-		this.ownerCpf = acc.getOwnerCpf();
+		this.ownerName = user.getFullName();
+		this.ownerCpf = user.getCpf();
 		this.accountType = acc.getAccountType();
-		this.ownerAddress =acc.getOwnerAddress();
+		this.ownerAddress = user.getAddress();
 		this.balance =acc.getBalance();
-		this.accountActive =acc.getAccountActive();
+		this.transferLimit = acc.getTransferLimit();
+		this.loanLimitTotal = acc.getLoanLimitTotal();
+		this.loanLimitCurrent = acc.getLoanLimitCurrent();
+		this.withdrawLimit = acc.getWithdrawLimit();
+	}
+	
+	public CompleteAccountDTO(User user) {
+		Account acc = user.getAccount();
+		this.id = acc.getId();
+		this.accountNumber = acc.getAccountNumber();
+		this.accountDigit = acc.getAccountDigit();
+		this.agency = acc.getAgency();
+		this.ownerName = user.getFullName();
+		this.ownerCpf = user.getCpf();
+		this.accountType = acc.getAccountType();
+		this.ownerAddress = user.getAddress();
+		this.balance =acc.getBalance();
 		this.transferLimit = acc.getTransferLimit();
 		this.loanLimitTotal = acc.getLoanLimitTotal();
 		this.loanLimitCurrent = acc.getLoanLimitCurrent();
@@ -113,14 +130,6 @@ public class CompleteAccountDTO implements Serializable{
 
 	public void setBalance(Double balance) {
 		this.balance = balance;
-	}
-
-	public Boolean getAccountActive() {
-		return accountActive;
-	}
-
-	public void setAccountActive(Boolean accountActive) {
-		this.accountActive = accountActive;
 	}
 
 	public Double getLoanLimitTotal() {

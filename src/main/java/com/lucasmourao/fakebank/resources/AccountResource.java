@@ -20,12 +20,12 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.lucasmourao.fakebank.dto.AccountCreationDTO;
 import com.lucasmourao.fakebank.dto.AccountLimitsDTO;
+import com.lucasmourao.fakebank.dto.AccountUpdateDTO;
 import com.lucasmourao.fakebank.dto.CompleteAccountDTO;
 import com.lucasmourao.fakebank.dto.LoanOrderRequestDTO;
 import com.lucasmourao.fakebank.dto.OrderRequestDTO;
 import com.lucasmourao.fakebank.dto.SimpleAccountDTO;
 import com.lucasmourao.fakebank.dto.TransferOrderRequestDTO;
-import com.lucasmourao.fakebank.entities.Account;
 import com.lucasmourao.fakebank.entities.LoanOrder;
 import com.lucasmourao.fakebank.entities.Order;
 import com.lucasmourao.fakebank.entities.TransferOrder;
@@ -70,7 +70,7 @@ public class AccountResource {
 			@RequestParam(value = "ownerCpf", defaultValue = "") String ownerCpf) {
 
 		Pageable pageable = PageRequest.of(page, limit);
-		Page<SimpleAccountDTO> list = service.fullSearch(ownerName, ownerCpf, accountNumber, accountDigit,agency, pageable);
+		Page<SimpleAccountDTO> list = service.fullSearch(ownerName, ownerCpf, accountNumber, accountDigit, agency, pageable);
 		return ResponseEntity.ok().body(list);
 	}
 
@@ -113,7 +113,7 @@ public class AccountResource {
 	}
 
 	@PutMapping(value = "/{id}")
-	public ResponseEntity<CompleteAccountDTO> updateAccount(@PathVariable long id, @RequestBody Account acc) {
+	public ResponseEntity<CompleteAccountDTO> updateAccount(@PathVariable long id, @RequestBody AccountUpdateDTO acc) {
 		CompleteAccountDTO account = service.updateAccount(id, acc);
 		return ResponseEntity.ok().body(account);
 	}

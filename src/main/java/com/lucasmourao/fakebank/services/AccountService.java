@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import com.lucasmourao.fakebank.dto.AccountCreationDTO;
 import com.lucasmourao.fakebank.dto.AccountLimitsDTO;
+import com.lucasmourao.fakebank.dto.AccountUpdateDTO;
 import com.lucasmourao.fakebank.dto.CompleteAccountDTO;
 import com.lucasmourao.fakebank.dto.LoanOrderRequestDTO;
 import com.lucasmourao.fakebank.dto.OrderRequestDTO;
@@ -28,9 +29,11 @@ import com.lucasmourao.fakebank.entities.LoanOrder;
 import com.lucasmourao.fakebank.entities.LoanRate;
 import com.lucasmourao.fakebank.entities.Order;
 import com.lucasmourao.fakebank.entities.TransferOrder;
+import com.lucasmourao.fakebank.entities.User;
 import com.lucasmourao.fakebank.entities.enums.AccountType;
 import com.lucasmourao.fakebank.entities.enums.OrderType;
 import com.lucasmourao.fakebank.repositories.AccountRepository;
+import com.lucasmourao.fakebank.repositories.UserRepository;
 import com.lucasmourao.fakebank.services.exceptions.DatabaseException;
 import com.lucasmourao.fakebank.services.exceptions.FieldRequiredException;
 import com.lucasmourao.fakebank.services.exceptions.InsufficientBalanceException;
@@ -45,6 +48,9 @@ public class AccountService {
 	@Autowired
 	private AccountRepository repository;
 
+	@Autowired
+	private UserRepository userRepository;
+	
 	@Autowired
 	private LimitService limitService;
 
@@ -72,13 +78,13 @@ public class AccountService {
 
 	public Page<SimpleAccountDTO> fullSearch(String ownerName, String ownerCpf, Integer accountNumber,
 			Integer accountDigit, Integer agency, Pageable pageable) {
-		return repository.fullSearch(ownerName, ownerCpf, accountNumber, accountDigit, agency, pageable)
-				.map(x -> new SimpleAccountDTO(x));
+		String userName = Integer.toString(agency) + Integer.toString(accountNumber) + Integer.toString(accountDigit);
+		return userRepository.fullSearch(userName, ownerName, ownerCpf, pageable).map(x -> new SimpleAccountDTO(x));
 	}
 
 	public Account findAccount(OrderRequestDTO orderRequest) {
 		List<Account> account = repository.findAccount(orderRequest.getAccountNumber(), orderRequest.getAccountDigit(),
-				orderRequest.getAgency(), orderRequest.getOwnerName(), orderRequest.getPassword());
+				orderRequest.getAgency());
 		if (account.isEmpty()) {
 			throw new ObjectNotFoundException(-1L);
 		}
@@ -87,13 +93,12 @@ public class AccountService {
 
 	public List<Account> findAccount(TransferOrderRequestDTO orderRequest) {
 		List<Account> receivingAccount = repository.findAccount(orderRequest.getReceivingAccountNumber(),
-				orderRequest.getReceivingAccountDigit(), orderRequest.getReceivingAccountAgency(),
-				orderRequest.getReceivingAccountOwnerCpf());
+				orderRequest.getReceivingAccountDigit(), orderRequest.getReceivingAccountAgency());
 		if (receivingAccount.isEmpty()) {
 			throw new ObjectNotFoundException(-1L);
 		}
 		List<Account> account = repository.findAccount(orderRequest.getAccountNumber(), orderRequest.getAccountDigit(),
-				orderRequest.getAgency(), orderRequest.getOwnerName(), orderRequest.getPassword());
+				orderRequest.getAgency());
 		if (account.isEmpty()) {
 			throw new ObjectNotFoundException(-1L);
 		}
@@ -104,7 +109,7 @@ public class AccountService {
 		return account;
 	}
 
-	public Account insertAccount(AccountCreationDTO acc) {
+	public User insertAccount(AccountCreationDTO acc) {
 
 		verifyAccountData(acc);
 		int[] accountData = generateAccount();
@@ -113,11 +118,15 @@ public class AccountService {
 		Double loanLimitTotal = limitService.findLimit(acc.getAccountType(), OrderType.LOAN.getCode()).getAmount();
 		Double withdrawLimit = limitService.findLimit(acc.getAccountType(), OrderType.WITHDRAW.getCode()).getAmount();
 
-		Account accAux = new Account(null, accountData[0], 1000, acc.getPassword(), acc.getOwnerName(),
-				acc.getOwnerCpf(), acc.getOwnerAddress(), 0.0, true, AccountType.valueOf(acc.getAccountType()),
+		Account accAux = new Account(null, accountData[0], 1000, 0.0, AccountType.valueOf(acc.getAccountType()),
 				accountData[1], transferLimit, loanLimitTotal, withdrawLimit);
-
-		return repository.save(accAux);
+		repository.save(accAux);
+		
+		String sAcc = "1000" + Integer.toString(accountData[0]) + Integer.toString(accountData[1]);
+		User user = new User(null, acc.getOwnerName(), acc.getOwnerAddress(), acc.getOwnerCpf(), sAcc , acc.getPassword(), true, true, true, true, accAux);
+		userRepository.save(user);
+		
+		return user;
 	}
 
 	public Order deposit(OrderRequestDTO depositOrder) {
@@ -201,6 +210,11 @@ public class AccountService {
 
 	public void deleteById(long id) {
 		try {
+			Optional<Account> acc = repository.findById(id);
+			userRepository.deleteById(acc.get().getUser().getId());
+			for(Order order : acc.get().getOrders()) {
+				orderService.delete(order.getId());
+			}
 			repository.deleteById(id);
 		} catch (EmptyResultDataAccessException e) {
 			throw new ObjectNotFoundException(id);
@@ -209,9 +223,9 @@ public class AccountService {
 		}
 	}
 
-	public CompleteAccountDTO updateAccount(long id, Account acc) {
-		Optional<Account> accAux = repository.findById(id);
-		return new CompleteAccountDTO(updateData(accAux.orElseThrow(() -> new ObjectNotFoundException(id)), acc));
+	public CompleteAccountDTO updateAccount(long id, AccountUpdateDTO acc) {
+		Optional<User> userAux = userRepository.findById(id);
+		return new CompleteAccountDTO(updateData(userAux.orElseThrow(() -> new ObjectNotFoundException(id)), acc));
 	}
 
 	public CompleteAccountDTO updateAccountLimits(long id, AccountLimitsDTO accountLimits) {
@@ -219,25 +233,28 @@ public class AccountService {
 		return new CompleteAccountDTO(UpdateLimitsData(acc, accountLimits));
 	}
 
-	private Account updateData(Account accAux, Account acc) {
+	private User updateData(User userAux, AccountUpdateDTO acc) {
 
-		if (acc.getOwnerAddress() != null) {
-			accAux.setOwnerAddress(acc.getOwnerAddress());
+		if (acc.getAddress() != null) {
+			userAux.setAddress(acc.getAddress());
 		}
 		if (acc.getOwnerCpf() != null) {
-			accAux.setOwnerCpf(acc.getOwnerCpf());
+			if (!acc.getOwnerCpf().matches("[0-9]+") || acc.getOwnerCpf().length() != 11) {
+				throw new InvalidFormatException("CPF must contain only 11 digits.");
+			}
+			userAux.setCpf(acc.getOwnerCpf());
 		}
 		if (acc.getOwnerName() != null) {
-			accAux.setOwnerName(acc.getOwnerName());
+			userAux.setFullName(acc.getOwnerName());
 		}
 		if (acc.getPassword() != null) {
-			accAux.setPassword(acc.getPassword());
+			if (!acc.getPassword().matches("[0-9]+") || acc.getPassword().length() != 6) {
+				throw new InvalidFormatException("Password must contain only 6 digits.");
+			}
+			userAux.setPassword(acc.getPassword());
 		}
-		if (acc.getAccountActive() != null) {
-			accAux.setAccountActive(acc.getAccountActive());
-		}
-
-		return repository.save(accAux);
+		
+		return userRepository.save(userAux);
 	}
 
 	private Account UpdateLimitsData(Account acc, AccountLimitsDTO accountLimits) {
@@ -316,9 +333,6 @@ public class AccountService {
 		}
 		if (transferOrder.getReceivingAccountNumber() == null) {
 			throw new FieldRequiredException("Receiving account number");
-		}
-		if (transferOrder.getReceivingAccountOwnerCpf() == null) {
-			throw new FieldRequiredException("Receiving account owner CPF");
 		}
 	}
 

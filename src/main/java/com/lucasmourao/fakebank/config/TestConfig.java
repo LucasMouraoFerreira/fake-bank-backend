@@ -15,6 +15,7 @@ import com.lucasmourao.fakebank.entities.LoanOrder;
 import com.lucasmourao.fakebank.entities.LoanRate;
 import com.lucasmourao.fakebank.entities.Order;
 import com.lucasmourao.fakebank.entities.TransferOrder;
+import com.lucasmourao.fakebank.entities.User;
 import com.lucasmourao.fakebank.entities.enums.AccountType;
 import com.lucasmourao.fakebank.entities.enums.OrderType;
 import com.lucasmourao.fakebank.repositories.AccountRepository;
@@ -22,6 +23,7 @@ import com.lucasmourao.fakebank.repositories.FeeRepository;
 import com.lucasmourao.fakebank.repositories.LimitRepository;
 import com.lucasmourao.fakebank.repositories.LoanRateRepository;
 import com.lucasmourao.fakebank.repositories.OrderRepository;
+import com.lucasmourao.fakebank.repositories.UserRepository;
 
 @Configuration
 @Profile("test")
@@ -41,16 +43,22 @@ public class TestConfig implements CommandLineRunner {
 	
 	@Autowired
 	private LoanRateRepository loanRateRepository;
+	
+	@Autowired
+	private UserRepository userRepository;
 
 	@Override
 	public void run(String... agrs) throws Exception {
 
-		Account acc1 = new Account(null, 10125, 1000, "123456", "Lucas Ferreira", "12590136489", "Rua exemplo 54", 0.0,
-				true, AccountType.STANDARD, 3, 2500.0, 10000.0, 1000.0);
-		Account acc2 = new Account(null, 10124, 1000, "654321", "Danilo Ferreira", "12594536479", "Rua exemplo 33", 0.0,
-				true, AccountType.PREMIUM, 5, 5000.0, 50000.0, 2500.0);
+		Account acc1 = new Account(null, 10125, 1000, 0.0, AccountType.STANDARD, 3, 2500.0, 10000.0, 1000.0);
+		Account acc2 = new Account(null, 10124, 1000, 0.0, AccountType.PREMIUM, 5, 5000.0, 50000.0, 2500.0);
 		accountRepository.saveAll(Arrays.asList(acc1, acc2));
 
+		User user1 = new User(null,"Lucas Ferreira","Rua x 19","12345678905","1000101253","123456", true, true, true, true, acc1);
+		User user2 = new User(null,"Danilo Ferreira","Rua x 17","12545676905","1000101245","123456", true, true, true, true, acc2);
+		userRepository.saveAll(Arrays.asList(user1,user2));
+		
+		
 		Fee f2 = new Fee(null, "Transfer Fee - Premium", "Transfer fee for a Premium account", 0.003, 8.0,
 				AccountType.PREMIUM, OrderType.TRANSFER);
 		Fee f3 = new Fee(null, "Withdraw Fee - Premium", "Withdraw fee for a Premium account", 0.0, 5.0,

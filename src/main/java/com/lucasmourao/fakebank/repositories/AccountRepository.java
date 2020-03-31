@@ -16,21 +16,9 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
 
 	public Page<Account> findByAgency(Integer agency, Pageable pageable);
 
-	@Query("SELECT a FROM Account a where ((UPPER(a.ownerName) like UPPER(concat('%', :ownerName,'%'))) or (a.ownerCpf = :ownerCpf) or (a.accountNumber = :accountNumber and a.accountDigit = :accountDigit and a.agency = :agency))")
-	Page<Account> fullSearch(@Param("ownerName") String ownerName, @Param("ownerCpf") String ownerCpf,
-			@Param("accountNumber") Integer accountNumber, @Param("accountDigit") Integer accountDigit,
-			@Param("agency") Integer agency, Pageable pageable);
-
-	@Query("SELECT a FROM Account a where a.accountNumber = :accountNumber and a.accountDigit = :accountDigit and a.agency = :agency")
+	@Query("SELECT a FROM Account a where (a.accountNumber = :accountNumber and a.accountDigit = :accountDigit and a.agency = :agency)")
 	List<Account> findAccount(@Param("accountNumber") Integer accountNumber,
-			@Param("accountDigit") Integer accountDigit, @Param("agency") Integer agency);
-
-	@Query("SELECT a FROM Account a where a.accountNumber = :accountNumber and a.accountDigit = :accountDigit and a.agency = :agency and a.ownerName = :ownerName and a.password = :password")
-	List<Account> findAccount(@Param("accountNumber") Integer accountNumber, @Param("accountDigit") Integer accountDigit,
-			@Param("agency") Integer agency, @Param("ownerName") String ownerName, @Param("password") String password);
-
-	@Query("SELECT a FROM Account a where a.accountNumber = :accountNumber and a.accountDigit = :accountDigit and a.agency = :agency and a.ownerCpf = :ownerCpf")
-	List<Account> findAccount(@Param("accountNumber") Integer accountNumber,
-			@Param("accountDigit") Integer accountDigit, @Param("agency") Integer agency, @Param("ownerCpf") String ownerCpf);
+			@Param("accountDigit") Integer accountDigit, @Param("agency") Integer agency); 
+			
 
 }

@@ -9,6 +9,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
@@ -31,17 +32,7 @@ public class Account implements Serializable {
 	@NotNull
 	private Integer agency;
 	@NotNull
-	private String password;
-	@NotNull
-	private String ownerName;
-	@NotNull
-	private String ownerCpf;
-	@NotNull
-	private String ownerAddress;
-	@NotNull
 	private Double balance;
-	@NotNull
-	private Boolean accountActive;
 	@NotNull
 	private Integer accountType;
 	@NotNull
@@ -57,21 +48,18 @@ public class Account implements Serializable {
 	@OneToMany(mappedBy = "account")
 	private List<Order> orders = new ArrayList<>();
 
+	@OneToOne(mappedBy = "account")
+    private User user;
+	
 	public Account() {
 	}
 
-	public Account(Long id, Integer accountNumber, Integer agency, String password, String ownerName, String ownerCpf,
-			String ownerAddress, Double balance, Boolean accountActive, AccountType accountType, Integer accountDigit,
+	public Account(Long id, Integer accountNumber, Integer agency, Double balance, AccountType accountType, Integer accountDigit,
 			Double transferLimit, Double loanLimitTotal, Double withdrawLimit) {
 		this.id = id;
 		this.accountNumber = accountNumber;
 		this.agency = agency;
-		this.password = password;
-		this.ownerName = ownerName;
-		this.ownerCpf = ownerCpf;
-		this.ownerAddress = ownerAddress;
 		this.balance = balance;
-		this.accountActive = accountActive;
 		this.setAccountType(accountType);
 		this.accountDigit = accountDigit;
 		this.transferLimit = transferLimit;
@@ -100,52 +88,12 @@ public class Account implements Serializable {
 		this.agency = agency;
 	}
 
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
-
-	public String getOwnerName() {
-		return ownerName;
-	}
-
-	public void setOwnerName(String ownerName) {
-		this.ownerName = ownerName;
-	}
-
-	public String getOwnerCpf() {
-		return ownerCpf;
-	}
-
-	public void setOwnerCpf(String ownerCpf) {
-		this.ownerCpf = ownerCpf;
-	}
-
-	public String getOwnerAddress() {
-		return ownerAddress;
-	}
-
-	public void setOwnerAddress(String ownerAddress) {
-		this.ownerAddress = ownerAddress;
-	}
-
 	public Double getBalance() {
 		return balance;
 	}
 
 	public void setBalance(Double balance) {
 		this.balance = balance;
-	}
-
-	public Boolean getAccountActive() {
-		return accountActive;
-	}
-
-	public void setAccountActive(Boolean accountActive) {
-		this.accountActive = accountActive;
 	}
 
 	public AccountType getAccountType() {
@@ -203,6 +151,10 @@ public class Account implements Serializable {
 
 	public void setWithdrawLimit(Double withdrawLimit) {
 		this.withdrawLimit = withdrawLimit;
+	}
+	
+	public User getUser() {
+		return user;
 	}
 
 	@Override

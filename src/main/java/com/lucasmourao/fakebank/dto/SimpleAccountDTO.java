@@ -3,6 +3,7 @@ package com.lucasmourao.fakebank.dto;
 import java.io.Serializable;
 
 import com.lucasmourao.fakebank.entities.Account;
+import com.lucasmourao.fakebank.entities.User;
 import com.lucasmourao.fakebank.entities.enums.AccountType;
 
 public class SimpleAccountDTO implements Serializable{
@@ -20,12 +21,24 @@ public class SimpleAccountDTO implements Serializable{
 	public SimpleAccountDTO() {}
 
 	public SimpleAccountDTO(Account acc) {
+		User user = acc.getUser();
 		this.id = acc.getId();
 		this.accountNumber = acc.getAccountNumber();
 		this.accountDigit = acc.getAccountDigit();
 		this.agency = acc.getAgency();
-		this.ownerName = acc.getOwnerName();
-		this.ownerCpf = acc.getOwnerCpf();
+		this.ownerName = user.getFullName();
+		this.ownerCpf = user.getCpf();
+		this.accountType = acc.getAccountType();
+	}
+	
+	public SimpleAccountDTO(User user) {
+		Account acc = user.getAccount();
+		this.id = acc.getId();
+		this.accountNumber = acc.getAccountNumber();
+		this.accountDigit = acc.getAccountDigit();
+		this.agency = acc.getAgency();
+		this.ownerName = user.getFullName();
+		this.ownerCpf = user.getCpf();
 		this.accountType = acc.getAccountType();
 	}
 

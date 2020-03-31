@@ -7,18 +7,17 @@ public class TransferOrderRequestDTO extends OrderRequestDTO{
 	private Integer receivingAccountNumber;
 	private Integer receivingAccountDigit;
 	private Integer receivingAccountAgency;
-	private String receivingAccountOwnerCpf;
-	
+		
 	public TransferOrderRequestDTO() {}
 
 	public TransferOrderRequestDTO(Double amount, Integer accountNumber, Integer accountDigit, Integer agency,
 			String ownerName, String password, Integer receivingAccountNumber, Integer receivingAccountDigit,
-			Integer receivingAccountAgency, String receivingAccountOwnerCpf) {
+			Integer receivingAccountAgency) {
 		super(amount, accountNumber, accountDigit, agency, ownerName, password);
 		this.receivingAccountNumber = receivingAccountNumber;
 		this.receivingAccountDigit = receivingAccountDigit;
 		this.receivingAccountAgency = receivingAccountAgency;
-		this.setReceivingAccountOwnerCpf(receivingAccountOwnerCpf);
+		
 	}
 
 	public Integer getReceivingAccountNumber() {
@@ -45,12 +44,5 @@ public class TransferOrderRequestDTO extends OrderRequestDTO{
 		this.receivingAccountAgency = receivingAccountAgency;
 	}
 
-	public String getReceivingAccountOwnerCpf() {
-		return receivingAccountOwnerCpf;
-	}
-
-	public void setReceivingAccountOwnerCpf(String receivingAccountOwnerCpf) {
-		this.receivingAccountOwnerCpf = receivingAccountOwnerCpf;
-	}
 		
 }

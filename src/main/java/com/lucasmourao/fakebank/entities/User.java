@@ -2,15 +2,18 @@ package com.lucasmourao.fakebank.entities;
 
 import java.io.Serializable;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
+import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
+@Entity
+@Table(name = "tb_user")
 public class User implements Serializable{
 
 	private static final long serialVersionUID = 1L;
@@ -38,17 +41,18 @@ public class User implements Serializable{
 	@NotNull
 	private Boolean credentialsNonExpired;
 	@NotNull
-	private Boolean Enabled;
+	private Boolean enabled;
 	
-	@OneToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name = "account_id", referencedColumnName = "id")
+	@OneToOne
+	@JoinColumn(name = "account_id")
 	private Account	account;
 	
 	public User () {}
 	
 	public User(Long id, @NotNull String fullName, @NotNull String cpf, @NotNull String address,
 			@NotNull String userName, @NotNull String password, @NotNull Boolean accountNonExpired,
-			@NotNull Boolean accountNonLocked, @NotNull Boolean credentialsNonExpired, @NotNull Boolean enabled) {
+			@NotNull Boolean accountNonLocked, @NotNull Boolean credentialsNonExpired, @NotNull Boolean enabled,
+			Account account) {
 		this.id = id;
 		this.fullName = fullName;
 		this.cpf = cpf;
@@ -58,7 +62,8 @@ public class User implements Serializable{
 		this.accountNonExpired = accountNonExpired;
 		this.accountNonLocked = accountNonLocked;
 		this.credentialsNonExpired = credentialsNonExpired;
-		Enabled = enabled;
+		this.enabled = enabled;
+		this.account = account;
 	}
 
 	public Long getId() {
@@ -134,11 +139,15 @@ public class User implements Serializable{
 	}
 
 	public Boolean getEnabled() {
-		return Enabled;
+		return enabled;
 	}
 
 	public void setEnabled(Boolean enabled) {
-		Enabled = enabled;
+		this.enabled = enabled;
+	}
+	
+	public Account getAccount() {
+		return account;
 	}
 
 	@Override
