@@ -16,6 +16,7 @@ import com.lucasmourao.fakebank.services.exceptions.InvalidFormatException;
 import com.lucasmourao.fakebank.services.exceptions.LimitExceededException;
 import com.lucasmourao.fakebank.services.exceptions.NegativeValueException;
 import com.lucasmourao.fakebank.services.exceptions.ObjectNotFoundException;
+import com.lucasmourao.fakebank.services.exceptions.UsernameNotFoundException;
 
 @ControllerAdvice
 public class ResourceExceptionHandler {
@@ -71,6 +72,14 @@ public class ResourceExceptionHandler {
 	@ExceptionHandler(LimitExceededException.class)
 	public ResponseEntity<StandardError> limitExceededException(LimitExceededException e, HttpServletRequest request){
 		String error = "Limit exceeded error";
+		HttpStatus status = HttpStatus.BAD_REQUEST;
+		StandardError err = new StandardError(Instant.now(),status.value(),error,e.getMessage(),request.getRequestURI());
+		return ResponseEntity.status(status).body(err);
+	}
+	
+	@ExceptionHandler(UsernameNotFoundException.class)
+	public ResponseEntity<StandardError> usernameNotFoundException(UsernameNotFoundException e, HttpServletRequest request){
+		String error = "Account Not Found";
 		HttpStatus status = HttpStatus.BAD_REQUEST;
 		StandardError err = new StandardError(Instant.now(),status.value(),error,e.getMessage(),request.getRequestURI());
 		return ResponseEntity.status(status).body(err);
